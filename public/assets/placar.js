@@ -86,3 +86,79 @@ async function carregar() {
 
 carregar();
 setInterval(carregar, 15000);
+// ===== Área do admin =====
+const ADMIN_EMAIL = "andrefigueiredo.v@gmail.com";
+
+const btnAreaAdmin = document.getElementById("btnAreaAdmin");
+const adminPainel = document.getElementById("adminPainel");
+const btnAdminLogin = document.getElementById("btnAdminLogin");
+const btnResetPlacar = document.getElementById("btnResetPlacar");
+const adminMsg = document.getElementById("adminMsg");
+
+btnAreaAdmin.addEventListener("click", () => {
+  const abrindo = adminPainel.style.display === "none";
+  adminPainel.style.display = abrindo ? "block" : "none";
+  if (abrindo) verificarAdmin();
+});
+
+btnAdminLogin.addEventListener("click", async () => {
+  btnAdminLogin.disabled = true;
+  btnAdminLogin.textContent = "Redirecionando...";
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.href },
+  });
+});
+
+async function verificarAdmin() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const ehAdmin = session?.user?.email === ADMIN_EMAIL;
+
+  btnAdminLogin.style.display = ehAdmin ? "none" : "inline-block";
+  btnResetPlacar.style.display = ehAdmin ? "inline-block" : "none";
+
+  if (session && !ehAdmin) {
+    adminMsg.textContent = "Essa conta não tem permissão de admin.";
+  } else {
+    adminMsg.textContent = "";
+  }
+}
+
+btnResetPlacar.addEventListener("click", async () => {
+  const confirmar = confirm(
+    "Tem certeza que quer apagar TODAS as avaliações? Essa ação não pode ser desfeita.",
+  );
+  if (!confirmar) return;
+
+  const confirmarDeNovo = confirm(
+    "Confirmando de novo: isso vai zerar o placar geral pra todos os restaurantes. Continuar?",
+  );
+  if (!confirmarDeNovo) return;
+
+  btnResetPlacar.disabled = true;
+  btnResetPlacar.textContent = "Resetando...";
+
+  const { error } = await supabase
+    .from("avaliacoes")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000"); // deleta todas as linhas
+
+  btnResetPlacar.disabled = false;
+  btnResetPlacar.textContent = "Resetar placar";
+
+  if (error) {
+    console.error(error);
+    adminMsg.textContent = "Erro ao resetar: " + error.message;
+    return;
+  }
+
+  adminMsg.textContent = "Placar resetado com sucesso!";
+  carregar();
+});
+
+supabase.auth.onAuthStateChange(() => {
+  if (adminPainel.style.display !== "none") verificarAdmin();
+});
