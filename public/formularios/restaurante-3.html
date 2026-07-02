@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Avalie o Boteco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/estilo-comanda.css">
+</head>
+<body data-restaurante="3">
+<div class="wrap">
+
+  <div class="cabecalho">
+    <span class="selo">ARRAIÁ / NOITE DO BOTECO</span>
+    <h1>Ficha de<br>Avaliação</h1>
+    <p class="subt">Você está avaliando: <span id="nomeRestaurante">carregando...</span></p>
+  </div>
+
+  <form id="formAvaliacao" class="comanda">
+    <div class="comanda-num">COMANDA Nº <span id="numComanda">0000</span></div>
+
+    <div class="categoria" data-cat="comida">
+      <div class="categoria-label"><span class="icone">🍢</span> Comida</div>
+      <div class="tampinhas" data-nota="0"></div>
+    </div>
+
+    <div class="categoria" data-cat="ambiente">
+      <div class="categoria-label"><span class="icone">💡</span> Ambiente</div>
+      <div class="tampinhas" data-nota="0"></div>
+    </div>
+
+    <div class="categoria" data-cat="bebidas">
+      <div class="categoria-label"><span class="icone">🍺</span> Bebidas</div>
+      <div class="tampinhas" data-nota="0"></div>
+    </div>
+
+    <div class="campo">
+      <label for="comentario">Comentário (opcional)</label>
+      <textarea id="comentario" placeholder="Conta pra gente o que achou..."></textarea>
+    </div>
+
+    <button type="submit" class="enviar">Carimbar avaliação</button>
+    <p class="erro" id="msgErro">Dá uma nota em todas as categorias antes de enviar 🙂</p>
+  </form>
+
+  <div class="tela-obrigado" id="telaObrigado">
+    <div class="carimbo">Avaliado ✓</div>
+    <h1 style="font-size:22px;">Valeu por avaliar!</h1>
+    <p class="subt">Sua nota ajuda a eleger o melhor boteco da noite.</p>
+  </div>
+
+  <p class="rodape">feito com carinho pro arraiá 🌽</p>
+</div>
+
+<script type="module" src="../assets/formulario.js"></script>
+</body>
+</html>
