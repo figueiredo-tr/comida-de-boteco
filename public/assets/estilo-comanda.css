@@ -295,3 +295,14 @@ button.enviar:disabled {
   color: #444;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
+.btn-voltar {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  background: #fff;
+  color: #333;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}

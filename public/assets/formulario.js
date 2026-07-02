@@ -23,7 +23,7 @@ function mostrarTela(tela) {
   [telaLogin, form, telaObrigado, telaJaAvaliado].forEach((el) => {
     if (el) el.style.display = "none";
   });
-  if (tela) tela.style.display = "";
+  if (tela) tela.style.display = "block";
 }
 
 btnEntrarGoogle.addEventListener("click", async () => {
