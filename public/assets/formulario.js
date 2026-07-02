@@ -36,32 +36,42 @@ btnEntrarGoogle.addEventListener("click", async () => {
 });
 
 async function jaAvaliouEsseRestaurante(userId) {
-  const { data, error } = await supabase
-    .from("avaliacoes")
-    .select("id")
-    .eq("restaurante_id", restauranteId)
-    .eq("user_id", userId)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from("avaliacoes")
+      .select("id")
+      .eq("restaurante_id", restauranteId)
+      .eq("user_id", userId)
+      .maybeSingle();
 
-  if (error) {
-    console.error(error);
+    if (error) {
+      console.error(error);
+      return false;
+    }
+    return !!data;
+  } catch (err) {
+    console.error("Erro ao verificar avaliação:", err);
     return false;
   }
-  return !!data;
 }
 
 async function iniciar() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  if (!session) {
+    if (!session) {
+      mostrarTela(telaLogin);
+      return;
+    }
+
+    const jaAvaliou = await jaAvaliouEsseRestaurante(session.user.id);
+    mostrarTela(jaAvaliou ? telaJaAvaliado : form);
+  } catch (err) {
+    console.error("Erro ao iniciar:", err);
     mostrarTela(telaLogin);
-    return;
   }
-
-  const jaAvaliou = await jaAvaliouEsseRestaurante(session.user.id);
-  mostrarTela(jaAvaliou ? telaJaAvaliado : form);
 }
 
 iniciar();
