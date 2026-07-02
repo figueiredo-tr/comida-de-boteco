@@ -229,3 +229,34 @@ h1 {
   font-size: 11px;
   color: rgba(243, 236, 216, 0.35);
 }
+.area-admin {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.admin-painel {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px dashed #888;
+  border-radius: 8px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-reset {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: #c0392b;
+  color: #fff;
+}
+
+.admin-msg {
+  font-size: 13px;
+  color: #c0392b;
+  margin: 0;
+}

@@ -89,16 +89,27 @@ setInterval(carregar, 15000);
 // ===== Área do admin =====
 const ADMIN_EMAIL = "andrefigueiredo.v@gmail.com";
 
-const btnAreaAdmin = document.getElementById("btnAreaAdmin");
+const gatilhoAdmin = document.getElementById("gatilhoAdmin");
 const adminPainel = document.getElementById("adminPainel");
 const btnAdminLogin = document.getElementById("btnAdminLogin");
 const btnResetPlacar = document.getElementById("btnResetPlacar");
 const adminMsg = document.getElementById("adminMsg");
 
-btnAreaAdmin.addEventListener("click", () => {
-  const abrindo = adminPainel.style.display === "none";
-  adminPainel.style.display = abrindo ? "block" : "none";
-  if (abrindo) verificarAdmin();
+let toques = 0;
+let ultimoToque = 0;
+
+gatilhoAdmin.addEventListener("click", () => {
+  const agora = Date.now();
+  if (agora - ultimoToque > 2000) toques = 0;
+  ultimoToque = agora;
+  toques++;
+
+  if (toques >= 5) {
+    toques = 0;
+    const abrindo = adminPainel.style.display === "none";
+    adminPainel.style.display = abrindo ? "block" : "none";
+    if (abrindo) verificarAdmin();
+  }
 });
 
 btnAdminLogin.addEventListener("click", async () => {
