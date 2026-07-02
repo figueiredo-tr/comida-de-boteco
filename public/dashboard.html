@@ -1,28 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Placar do Boteco</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/estilo-placar.css">
-</head>
-<body>
-<div class="container">
-  <header>
-    <span class="selo">ARRAIÁ / NOITE DO BOTECO</span>
-    <h1>Placar Geral</h1>
-    <p class="subt">Ranking em tempo real dos 4 botecos da noite</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Placar do Boteco</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Nunito+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/estilo-placar.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <span class="selo">ARRAIÁ / NOITE DO BOTECO</span>
+        <h1>Placar Geral</h1>
+        <p class="subt">Ranking em tempo real dos 4 botecos da noite</p>
+      </header>
 
-  <div id="conteudo">
-    <div class="pombinha">carregando avaliações...</div>
-  </div>
+      <div class="acesso-rapido">
+        <span class="acesso-rapido-titulo">Ir direto pro formulário:</span>
+        <div class="acesso-rapido-botoes" id="acessoRapido"></div>
+      </div>
 
-  <p class="atualizacao" id="atualizacao"></p>
-</div>
+      <div id="conteudo">
+        <div class="pombinha">carregando avaliações...</div>
+      </div>
 
-<script type="module" src="assets/placar.js"></script>
-</body>
+      <p class="atualizacao" id="atualizacao"></p>
+    </div>
+
+    <script type="module" src="assets/placar.js"></script>
+  </body>
 </html>
