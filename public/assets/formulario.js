@@ -16,14 +16,29 @@ const telaLogin = document.getElementById("telaLogin");
 const form = document.getElementById("formAvaliacao");
 const telaObrigado = document.getElementById("telaObrigado");
 const telaJaAvaliado = document.getElementById("telaJaAvaliado");
+const telaCarregando = document.getElementById("telaCarregando");
 const btnEntrarGoogle = document.getElementById("btnEntrarGoogle");
+const btnTentarNovamente = document.getElementById("btnTentarNovamente");
 const msgErro = document.getElementById("msgErro");
 
+let iniciando = false;
+
 function mostrarTela(tela) {
-  [telaLogin, form, telaObrigado, telaJaAvaliado].forEach((el) => {
-    if (el) el.style.display = "none";
-  });
+  [telaLogin, form, telaObrigado, telaJaAvaliado, telaCarregando].forEach(
+    (el) => {
+      if (el) el.style.display = "none";
+    },
+  );
   if (tela) tela.style.display = "block";
+}
+
+function comTimeout(promessa, ms) {
+  return Promise.race([
+    promessa,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), ms),
+    ),
+  ]);
 }
 
 btnEntrarGoogle.addEventListener("click", async () => {
@@ -35,14 +50,22 @@ btnEntrarGoogle.addEventListener("click", async () => {
   });
 });
 
+btnTentarNovamente.addEventListener("click", () => {
+  iniciando = false;
+  iniciar();
+});
+
 async function jaAvaliouEsseRestaurante(userId) {
   try {
-    const { data, error } = await supabase
-      .from("avaliacoes")
-      .select("id")
-      .eq("restaurante_id", restauranteId)
-      .eq("user_id", userId)
-      .maybeSingle();
+    const { data, error } = await comTimeout(
+      supabase
+        .from("avaliacoes")
+        .select("id")
+        .eq("restaurante_id", restauranteId)
+        .eq("user_id", userId)
+        .maybeSingle(),
+      6000,
+    );
 
     if (error) {
       console.error(error);
@@ -50,19 +73,24 @@ async function jaAvaliouEsseRestaurante(userId) {
     }
     return !!data;
   } catch (err) {
-    console.error("Erro ao verificar avaliação:", err);
-    return false;
+    console.error("Erro ou timeout ao verificar avaliação:", err);
+    throw err;
   }
 }
 
 async function iniciar() {
+  if (iniciando) return;
+  iniciando = true;
+  mostrarTela(telaCarregando);
+
   try {
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await comTimeout(supabase.auth.getSession(), 6000);
 
     if (!session) {
       mostrarTela(telaLogin);
+      iniciando = false;
       return;
     }
 
@@ -70,7 +98,14 @@ async function iniciar() {
     mostrarTela(jaAvaliou ? telaJaAvaliado : form);
   } catch (err) {
     console.error("Erro ao iniciar:", err);
-    mostrarTela(telaLogin);
+    msgErro.textContent =
+      "Demorou demais pra carregar. Toca no botão abaixo pra tentar de novo.";
+    msgErro.style.display = "block";
+    mostrarTela(telaCarregando);
+    telaCarregando.querySelector(".carregando-texto").style.display = "none";
+    btnTentarNovamente.style.display = "inline-block";
+  } finally {
+    iniciando = false;
   }
 }
 
@@ -147,9 +182,15 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  let session;
+  try {
+    const resultado = await comTimeout(supabase.auth.getSession(), 6000);
+    session = resultado.data.session;
+  } catch (err) {
+    msgErro.textContent = "Deu ruim ao verificar seu login. Tenta de novo?";
+    msgErro.style.display = "block";
+    return;
+  }
 
   if (!session) {
     mostrarTela(telaLogin);
