@@ -12,6 +12,61 @@ document.getElementById("numComanda").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
+const telaLogin = document.getElementById("telaLogin");
+const form = document.getElementById("formAvaliacao");
+const telaObrigado = document.getElementById("telaObrigado");
+const telaJaAvaliado = document.getElementById("telaJaAvaliado");
+const btnEntrarGoogle = document.getElementById("btnEntrarGoogle");
+const msgErro = document.getElementById("msgErro");
+
+function mostrarTela(tela) {
+  [telaLogin, form, telaObrigado, telaJaAvaliado].forEach((el) => {
+    if (el) el.style.display = "none";
+  });
+  if (tela) tela.style.display = "";
+}
+
+btnEntrarGoogle.addEventListener("click", async () => {
+  btnEntrarGoogle.disabled = true;
+  btnEntrarGoogle.textContent = "Redirecionando...";
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.href },
+  });
+});
+
+async function jaAvaliouEsseRestaurante(userId) {
+  const { data, error } = await supabase
+    .from("avaliacoes")
+    .select("id")
+    .eq("restaurante_id", restauranteId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return false;
+  }
+  return !!data;
+}
+
+async function iniciar() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    mostrarTela(telaLogin);
+    return;
+  }
+
+  const jaAvaliou = await jaAvaliouEsseRestaurante(session.user.id);
+  mostrarTela(jaAvaliou ? telaJaAvaliado : form);
+}
+
+iniciar();
+supabase.auth.onAuthStateChange(() => iniciar());
+
 // Monta o widget de estrelas (0 a 5, em passos de 0.5) dentro de cada categoria
 document.querySelectorAll(".tampinhas").forEach((container) => {
   container.classList.add("estrelas");
@@ -40,7 +95,6 @@ document.querySelectorAll(".tampinhas").forEach((container) => {
     botao.addEventListener("click", () => {
       const valorClicado = Number(botao.dataset.valor);
       const notaAtual = Number(container.dataset.nota);
-      // tocar de novo no mesmo ponto zera a nota (permite dar nota 0)
       const novaNota =
         container.dataset.avaliado === "1" && valorClicado === notaAtual
           ? 0
@@ -64,9 +118,6 @@ document.querySelectorAll(".tampinhas").forEach((container) => {
   });
 });
 
-const form = document.getElementById("formAvaliacao");
-const msgErro = document.getElementById("msgErro");
-
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
@@ -86,6 +137,15 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    mostrarTela(telaLogin);
+    return;
+  }
+
   const notaComida = Number(campoComida.dataset.nota);
   const notaAmbiente = Number(campoAmbiente.dataset.nota);
   const notaBebidas = Number(campoBebidas.dataset.nota);
@@ -98,6 +158,7 @@ form.addEventListener("submit", async (e) => {
   const { error } = await supabase.from("avaliacoes").insert({
     restaurante_id: restauranteId,
     restaurante_nome: restauranteNome,
+    user_id: session.user.id,
     nota_comida: notaComida,
     nota_ambiente: notaAmbiente,
     nota_bebidas: notaBebidas,
@@ -108,11 +169,13 @@ form.addEventListener("submit", async (e) => {
     console.error(error);
     botao.disabled = false;
     botao.textContent = "Carimbar avaliação";
-    msgErro.textContent = "Deu ruim ao enviar. Tenta de novo?";
+    msgErro.textContent =
+      error.code === "23505"
+        ? "Você já avaliou esse restaurante!"
+        : "Deu ruim ao enviar. Tenta de novo?";
     msgErro.style.display = "block";
     return;
   }
 
-  form.style.display = "none";
-  document.getElementById("telaObrigado").style.display = "block";
+  mostrarTela(telaObrigado);
 });

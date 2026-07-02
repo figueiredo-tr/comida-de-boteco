@@ -278,3 +278,20 @@ button.enviar:disabled {
   display: none;
   font-weight: 700;
 }
+.tela-login,
+.tela-ja-avaliado {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.entrar-google {
+  margin-top: 12px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  color: #444;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
