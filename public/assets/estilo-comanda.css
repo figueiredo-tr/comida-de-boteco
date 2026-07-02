@@ -259,7 +259,8 @@ button.enviar:disabled {
   color: var(--papel);
   padding: 40px 10px;
 }
-.tela-obrigado .carimbo {
+.tela-obrigado .carimbo,
+.tela-ja-avaliado .carimbo {
   display: inline-block;
   border: 3px solid var(--mostarda);
   color: var(--mostarda);
