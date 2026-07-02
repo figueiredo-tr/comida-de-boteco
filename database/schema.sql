@@ -7,9 +7,9 @@ create table if not exists avaliacoes (
   id uuid primary key default gen_random_uuid(),
   restaurante_id text not null,        -- ex: "1", "2", "3", "4"
   restaurante_nome text not null,      -- ex: "Boteco do Zé"
-  nota_comida smallint not null check (nota_comida between 1 and 5),
-  nota_ambiente smallint not null check (nota_ambiente between 1 and 5),
-  nota_bebidas smallint not null check (nota_bebidas between 1 and 5),
+  nota_comida numeric(2,1) not null check (nota_comida >= 0 and nota_comida <= 5 and (nota_comida * 2) = round(nota_comida * 2)),
+  nota_ambiente numeric(2,1) not null check (nota_ambiente >= 0 and nota_ambiente <= 5 and (nota_ambiente * 2) = round(nota_ambiente * 2)),
+  nota_bebidas numeric(2,1) not null check (nota_bebidas >= 0 and nota_bebidas <= 5 and (nota_bebidas * 2) = round(nota_bebidas * 2)),
   comentario text,
   created_at timestamptz not null default now()
 );
