@@ -9,6 +9,11 @@ export const SUPABASE_URL = "https://jchrsexjqsjsnstxggvr.supabase.co";
 export const SUPABASE_ANON_KEY =
   "sb_publishable_bHt1HT7PA-LyYjZkmN3xMg_PYzNTtF-";
 
+export const EVENTO = {
+  nome: "Primeiro Festival de Comida de Boteco",
+  local: "Água Boa, MG",
+  edicao: "1ª Edição",
+};
 export const RESTAURANTES = {
   1: "Recanto Bonanza",
   2: "Bar Anexo do Sabor Expresso",

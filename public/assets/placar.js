@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, RESTAURANTES } from "../config.js";
+import { EVENTO } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const conteudo = document.getElementById("conteudo");
@@ -19,6 +20,11 @@ acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   .join("");
 
 async function carregar() {
+  document.getElementById("festivalBanner").innerHTML = `
+  <span class="festival-selo">${EVENTO.edicao}</span>
+  <div class="festival-nome">${EVENTO.nome}</div>
+  <div class="festival-local">${EVENTO.local}</div>
+`;
   const { data, error } = await supabase
     .from("ranking_restaurantes")
     .select("*")
