@@ -4,8 +4,8 @@ import {
   SUPABASE_ANON_KEY,
   EVENTO,
   CRITERIOS,
+  RESTAURANTES,
 } from "../config.js";
-import { EVENTO } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const conteudo = document.getElementById("conteudo");
@@ -24,12 +24,35 @@ acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   )
   .join("");
 
-async function carregar() {
+// Renderiza a parte fixa do herói do festival (nome, local, edição, stats)
+// uma vez só — os números dentro são atualizados a cada carregar()
+function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
-  <span class="festival-selo">${EVENTO.edicao}</span>
-  <div class="festival-nome">${EVENTO.nome}</div>
-  <div class="festival-local">${EVENTO.local}</div>
-`;
+    <span class="hero-selo">${EVENTO.edicao}</span>
+    <h1 class="hero-nome">${EVENTO.nome}</h1>
+    <div class="hero-local">📍 ${EVENTO.local}</div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">${Object.keys(RESTAURANTES).length}</span>
+        <span class="stat-label">barracas</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statAvaliacoes">0</span>
+        <span class="stat-label">avaliações</span>
+      </div>
+      <div class="stat stat-live">
+        <span class="live-dot"></span>
+        <span class="stat-label">ao vivo</span>
+      </div>
+    </div>
+  `;
+}
+
+renderHero();
+
+const MEDALHAS = ["🥇", "🥈", "🥉"];
+
+async function carregar() {
   const { data, error } = await supabase
     .from("ranking_restaurantes")
     .select("*")
@@ -40,8 +63,21 @@ async function carregar() {
     return;
   }
 
+  const totalAvaliacoes = (data || []).reduce(
+    (acc, r) => acc + Number(r.total_avaliacoes || 0),
+    0,
+  );
+  const statEl = document.getElementById("statAvaliacoes");
+  if (statEl) statEl.textContent = totalAvaliacoes;
+
   if (!data || data.length === 0) {
-    conteudo.innerHTML = `<div class="pombinha">Nenhuma avaliação registrada ainda 🍻</div>`;
+    conteudo.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone">🍻</div>
+        <div class="vazio-titulo">Ainda sem avaliações</div>
+        <p class="vazio-texto">Escaneie o QR code de uma barraca e seja o primeiro a avaliar!</p>
+      </div>
+    `;
     return;
   }
 
@@ -49,9 +85,9 @@ async function carregar() {
     .map(
       (r, i) => `
     <div class="item ${i === 0 ? "primeiro" : ""}">
-      <div class="posicao">${i + 1}º</div>
+      <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
       <div class="info">
-        <div class="nome">${r.restaurante_nome}</div>
+        <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
         <div class="meta">${r.total_avaliacoes} avaliações</div>
       </div>
       <div class="media-geral">${Number(r.media_geral).toFixed(1)}</div>
@@ -96,6 +132,7 @@ async function carregar() {
 
 carregar();
 setInterval(carregar, 15000);
+
 // ===== Área do admin =====
 const ADMIN_EMAIL = "andrefigueiredo.v@gmail.com";
 
@@ -165,7 +202,7 @@ btnResetPlacar.addEventListener("click", async () => {
   const { error } = await supabase
     .from("avaliacoes")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000"); // deleta todas as linhas
+    .neq("id", "00000000-0000-0000-0000-000000000000");
 
   btnResetPlacar.disabled = false;
   btnResetPlacar.textContent = "Resetar placar";
