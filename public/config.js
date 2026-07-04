@@ -21,8 +21,12 @@ export const CRITERIOS = [
   { chave: "criatividade", label: "Criatividade", icone: "💡" },
 ];
 export const RESTAURANTES = {
-  1: "Recanto Bonanza",
-  2: "Bar Anexo do Sabor Expresso",
-  3: "Prosa Mineira",
-  4: "A Nós Gastrobar",
+  1: { nome: "Recanto Bonanza", prato: "Romance de Tilápia", logo: "" },
+  2: {
+    nome: "Bar Anexo do Sabor Expresso",
+    prato: "Crocante de Sabor",
+    logo: "",
+  },
+  3: { nome: "Prosa Mineira", prato: "Iscas de Tilápia", logo: "" },
+  4: { nome: "A Nós Gastrobar", prato: "Tentação de Costelinha", logo: "" },
 };

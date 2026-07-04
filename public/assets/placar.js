@@ -15,10 +15,10 @@ const acessoRapido = document.getElementById("acessoRapido");
 // Monta os botões de acesso rápido a partir do config.js
 acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   .map(
-    ([id, nome]) => `
+    ([id, r]) => `
   <a class="botao-restaurante" href="formularios/restaurante-${id}.html">
     <span class="numero">${id}</span>
-    <span class="nome">${nome}</span>
+    <span class="nome">${r.nome}</span>
   </a>
 `,
   )
