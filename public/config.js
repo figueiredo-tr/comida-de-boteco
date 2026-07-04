@@ -14,6 +14,12 @@ export const EVENTO = {
   local: "Água Boa, MG",
   edicao: "1ª Edição",
 };
+export const CRITERIOS = [
+  { chave: "sabor", label: "Sabor", icone: "😋" },
+  { chave: "apresentacao", label: "Apresentação", icone: "🎨" },
+  { chave: "textura", label: "Textura", icone: "🍗" },
+  { chave: "criatividade", label: "Criatividade", icone: "💡" },
+];
 export const RESTAURANTES = {
   1: "Recanto Bonanza",
   2: "Bar Anexo do Sabor Expresso",

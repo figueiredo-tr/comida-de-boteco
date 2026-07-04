@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, RESTAURANTES } from "../config.js";
+import {
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  EVENTO,
+  CRITERIOS,
+} from "../config.js";
 import { EVENTO } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -55,11 +60,10 @@ async function carregar() {
     )
     .join("");
 
-  const categorias = [
-    { chave: "media_comida", label: "🍢 Comida" },
-    { chave: "media_ambiente", label: "💡 Ambiente" },
-    { chave: "media_bebidas", label: "🍺 Bebidas" },
-  ];
+  const categorias = CRITERIOS.map((c) => ({
+    chave: `media_${c.chave}`,
+    label: `${c.icone} ${c.label}`,
+  }));
 
   const paineis = categorias
     .map(
