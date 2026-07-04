@@ -6,11 +6,12 @@
 // ============================================================
 
 export const SUPABASE_URL = "https://jchrsexjqsjsnstxggvr.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_bHt1HT7PA-LyYjZkmN3xMg_PYzNTtF-";
+export const SUPABASE_ANON_KEY =
+  "sb_publishable_bHt1HT7PA-LyYjZkmN3xMg_PYzNTtF-";
 
 export const RESTAURANTES = {
-  "1": "Boteco do Zé",
-  "2": "Bar da Esquina",
-  "3": "Espeto de Ouro",
-  "4": "Recanto do Chopp",
+  1: "Recanto Bonanza",
+  2: "Bar Anexo do Sabor Expresso",
+  3: "Prosa Mineira",
+  4: "A Nós Gastrobar",
 };
