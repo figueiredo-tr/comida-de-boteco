@@ -1,4 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
@@ -82,18 +81,20 @@ async function carregar() {
   }
 
   const ranking = data
-    .map(
-      (r, i) => `
+    .map((r, i) => {
+      const logo = RESTAURANTES[r.restaurante_id]?.logo;
+      return `
     <div class="item ${i === 0 ? "primeiro" : ""}">
-      <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
+      <div class="posicao">${i + 1}º</div>
+      ${logo ? `<div class="carimbo-logo-mini"><img src="${logo}" alt=""></div>` : ""}
       <div class="info">
-        <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
+        <div class="nome">${r.restaurante_nome}</div>
         <div class="meta">${r.total_avaliacoes} avaliações</div>
       </div>
       <div class="media-geral">${Number(r.media_geral).toFixed(1)}</div>
     </div>
-  `,
-    )
+  `;
+    })
     .join("");
 
   const categorias = CRITERIOS.map((c) => ({

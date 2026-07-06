@@ -20,19 +20,28 @@ document.getElementById("numComanda").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
+// Logo (carimbo) + nome do prato + foto do prato em polaroid
 const cabecalho = document.querySelector(".cabecalho");
 if (restaurante.logo) {
-  const logo = document.createElement("img");
-  logo.src = restaurante.logo;
-  logo.alt = restaurante.nome;
-  logo.className = "logo-restaurante";
-  cabecalho.insertBefore(logo, cabecalho.firstChild);
+  const carimbo = document.createElement("div");
+  carimbo.className = "carimbo-logo";
+  carimbo.innerHTML = `<img src="${restaurante.logo}" alt="${restaurante.nome}">`;
+  cabecalho.insertBefore(carimbo, cabecalho.firstChild);
 }
 if (restaurante.prato) {
   const prato = document.createElement("p");
   prato.className = "prato-nome";
   prato.textContent = `Prato: ${restaurante.prato}`;
   document.querySelector(".subt").after(prato);
+}
+if (restaurante.foto) {
+  const polaroid = document.createElement("div");
+  polaroid.className = "polaroid-prato";
+  polaroid.innerHTML = `
+    <img src="${restaurante.foto}" alt="${restaurante.prato}">
+    <p class="polaroid-legenda">${restaurante.prato}</p>
+  `;
+  cabecalho.after(polaroid);
 }
 
 // Monta as categorias de avaliação a partir do CRITERIOS (config.js)

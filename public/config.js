@@ -21,12 +21,28 @@ export const CRITERIOS = [
   { chave: "criatividade", label: "Criatividade", icone: "💡" },
 ];
 export const RESTAURANTES = {
-  1: { nome: "Recanto Bonanza", prato: "Romance de Tilápia", logo: "" },
+  1: {
+    nome: "Recanto Bonanza",
+    prato: "Romance de Tilápia",
+    logo: "../assets/logos/recanto-bonanza.png",
+    foto: "../assets/fotos/recanto-bonanza.jpg",
+  },
   2: {
     nome: "Bar Anexo do Sabor Expresso",
     prato: "Crocante de Sabor",
-    logo: "",
+    logo: "../assets/logos/bar-anexo.png",
+    foto: "../assets/fotos/bar-anexo.jpg",
   },
-  3: { nome: "Prosa Mineira", prato: "Iscas de Tilápia", logo: "" },
-  4: { nome: "A Nós Gastrobar", prato: "Tentação de Costelinha", logo: "" },
+  3: {
+    nome: "Prosa Mineira",
+    prato: "Iscas de Tilápia",
+    logo: "../assets/logos/prosa-mineira.png",
+    foto: "../assets/fotos/prosa-mineira.jpg",
+  },
+  4: {
+    nome: "A Nós Gastrobar",
+    prato: "Tentação de Costelinha",
+    logo: "../assets/logos/a-nos-gastrobar.png",
+    foto: "../assets/fotos/a-nos-gastrobar.jpg",
+  },
 };
