@@ -20,19 +20,21 @@ document.getElementById("numComanda").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
-// Logo (carimbo) + nome do prato + foto do prato em polaroid
+// Remove a linha "Você está avaliando: X" — o nome já vai aparecer embaixo da logo
+document.querySelector(".subt")?.remove();
+
+// Logo grande + nome do restaurante logo abaixo dela
 const cabecalho = document.querySelector(".cabecalho");
 if (restaurante.logo) {
   const carimbo = document.createElement("div");
   carimbo.className = "carimbo-logo";
   carimbo.innerHTML = `<img src="${restaurante.logo}" alt="${restaurante.nome}">`;
-  cabecalho.insertBefore(carimbo, cabecalho.firstChild);
-}
-if (restaurante.prato) {
-  const prato = document.createElement("p");
-  prato.className = "prato-nome";
-  prato.textContent = `Prato: ${restaurante.prato}`;
-  document.querySelector(".subt").after(prato);
+  cabecalho.appendChild(carimbo);
+
+  const nomeDestaque = document.createElement("p");
+  nomeDestaque.className = "nome-restaurante-logo";
+  nomeDestaque.textContent = restaurante.nome;
+  cabecalho.appendChild(nomeDestaque);
 }
 if (restaurante.foto) {
   const polaroid = document.createElement("div");
