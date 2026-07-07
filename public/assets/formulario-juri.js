@@ -44,6 +44,9 @@ if (restaurante.foto) {
   cabecalho.after(polaroid);
 }
 
+// Monta um grid de botões 0-5 por categoria (visual igual ao do público).
+// O valor é gravado direto, sem meia-nota, pra bater certinho com o banco
+// (check nota <= 5) e com a fórmula de pontuação (máx 50).
 const categoriasContainer = document.querySelector(".categorias-container");
 CRITERIOS.forEach((crit) => {
   const div = document.createElement("div");
@@ -51,7 +54,8 @@ CRITERIOS.forEach((crit) => {
   div.dataset.cat = crit.chave;
   div.innerHTML = `
     <div class="categoria-label"><span class="icone">${crit.icone}</span> ${crit.label}</div>
-    <div class="tampinhas" data-nota="0"></div>
+    <div class="nota-publica-grade" data-nota="0" data-avaliado="0"></div>
+    <div class="nota-publica-valor">toque para avaliar</div>
   `;
   categoriasContainer.appendChild(div);
 });
@@ -143,7 +147,7 @@ async function iniciar() {
     }
 
     mostrarTela(form);
-    montarEstrelas();
+    montarNotasCategorias();
   } catch (err) {
     console.error("Erro ao iniciar:", err);
     mostrarTela(telaCarregando);
@@ -155,57 +159,32 @@ async function iniciar() {
   }
 }
 
-function montarEstrelas() {
-  document.querySelectorAll(".tampinhas").forEach((container) => {
-    if (container.dataset.montado === "1") return;
-    container.dataset.montado = "1";
-    container.classList.add("estrelas");
-    container.dataset.nota = "0";
-    container.dataset.avaliado = "0";
+// Cria os botões 0-5 dentro de cada .nota-publica-grade (uma por categoria)
+function montarNotasCategorias() {
+  document.querySelectorAll(".nota-publica-grade").forEach((grade) => {
+    if (grade.dataset.montado === "1") return;
+    grade.dataset.montado = "1";
 
-    for (let i = 1; i <= 5; i++) {
-      const estrela = document.createElement("div");
-      estrela.className = "estrela";
-      estrela.dataset.indice = i;
-      estrela.innerHTML = `
-        <span class="estrela-fundo">★</span>
-        <span class="estrela-preenchida" style="width:0%">★</span>
-        <button type="button" class="zona-meia zona-esquerda" data-valor="${i - 0.5}" aria-label="Nota ${i - 0.5}"></button>
-        <button type="button" class="zona-meia zona-direita" data-valor="${i}" aria-label="Nota ${i}"></button>
-      `;
-      container.appendChild(estrela);
-    }
+    const valorEl = grade.nextElementSibling; // .nota-publica-valor logo depois
 
-    const rotulo = document.createElement("div");
-    rotulo.className = "estrelas-valor";
-    rotulo.textContent = "toque para avaliar";
-    container.after(rotulo);
-
-    container.querySelectorAll(".zona-meia").forEach((botao) => {
+    for (let n = 0; n <= 5; n++) {
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.className = "nota-botao";
+      botao.textContent = n;
+      botao.dataset.valorExibido = n;
       botao.addEventListener("click", () => {
-        const valorClicado = Number(botao.dataset.valor);
-        const notaAtual = Number(container.dataset.nota);
-        const novaNota =
-          container.dataset.avaliado === "1" && valorClicado === notaAtual
-            ? 0
-            : valorClicado;
+        grade
+          .querySelectorAll(".nota-botao")
+          .forEach((b) => b.classList.remove("selecionada"));
+        botao.classList.add("selecionada");
 
-        container.dataset.nota = novaNota;
-        container.dataset.avaliado = "1";
-
-        container.querySelectorAll(".estrela").forEach((estrela) => {
-          const idx = Number(estrela.dataset.indice);
-          const preench = Math.max(0, Math.min(1, novaNota - (idx - 1))) * 100;
-          estrela.querySelector(".estrela-preenchida").style.width =
-            preench + "%";
-        });
-
-        rotulo.textContent =
-          novaNota % 1 === 0
-            ? `nota: ${novaNota.toFixed(0)}`
-            : `nota: ${novaNota.toFixed(1)}`;
+        grade.dataset.nota = n;
+        grade.dataset.avaliado = "1";
+        if (valorEl) valorEl.textContent = `sua nota: ${n}`;
       });
-    });
+      grade.appendChild(botao);
+    }
   });
 }
 
@@ -218,7 +197,7 @@ form.addEventListener("submit", async (e) => {
 
   const campos = CRITERIOS.map((crit) => ({
     chave: crit.chave,
-    el: form.querySelector(`[data-cat="${crit.chave}"] .tampinhas`),
+    el: form.querySelector(`[data-cat="${crit.chave}"] .nota-publica-grade`),
   }));
 
   const todasAvaliadas = campos.every((c) => c.el.dataset.avaliado === "1");
