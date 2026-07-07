@@ -26,7 +26,7 @@ acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   <a class="botao-restaurante" href="formularios/restaurante-${id}.html">
     ${
       r.logo
-        ? `<img class="logo-restaurante" src="${r.logo}" alt="Logo ${r.nome}" loading="lazy">`
+        ? `<span class="carimbo-logo-mini"><img src="${r.logo}" alt="Logo ${r.nome}" loading="lazy"></span>`
         : `<span class="numero">${id}</span>`
     }
     <span class="nome">${r.nome}</span>
@@ -105,7 +105,7 @@ async function carregar() {
       <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
       ${
         logo
-          ? `<img class="logo-restaurante logo-restaurante-ranking" src="${logo}" alt="Logo ${r.restaurante_nome}" loading="lazy">`
+          ? `<span class="carimbo-logo-mini"><img src="${logo}" alt="Logo ${r.restaurante_nome}" loading="lazy"></span>`
           : ""
       }
       <div class="info">
