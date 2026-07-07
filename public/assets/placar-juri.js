@@ -23,7 +23,7 @@ function logoPorNome(nome) {
 acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   .map(
     ([id, r]) => `
-  <a class="botao-restaurante" href="restaurante-${id}.html">
+  <a class="botao-restaurante" href="/jurados/restaurante-${id}.html">
     ${
       r.logo
         ? `<span class="carimbo-logo-mini"><img src="${r.logo}" alt="Logo ${r.nome}" loading="lazy"></span>`
