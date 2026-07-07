@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1"
     />
-    <title>Avalie o Boteco</title>
+    <title>Avalie o Boteco — Júri</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap"
@@ -18,10 +18,10 @@
       href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌽</text></svg>"
     />
   </head>
-  <body data-restaurante="1">
+  <body data-restaurante="4">
     <div class="wrap">
       <div class="cabecalho">
-        <span class="selo">ARRAIÁ / NOITE DO BOTECO</span>
+        <span class="selo">ARRAIÁ / NOITE DO BOTECO — JÚRI</span>
         <h1>Ficha de<br />Avaliação</h1>
         <p class="subt">
           Você está avaliando: <span id="nomeRestaurante">carregando...</span>
@@ -52,7 +52,7 @@
           COMANDA Nº <span id="numComanda">0000</span>
         </div>
 
-        <div class="nota-publica-container"></div>
+        <div class="categorias-container"></div>
 
         <div class="campo">
           <label for="comentario">Comentário (opcional)</label>
@@ -64,7 +64,7 @@
 
         <button type="submit" class="enviar">Carimbar avaliação</button>
         <p class="erro" id="msgErro">
-          Dá uma nota de 0 a 10 antes de enviar 🙂
+          Dá uma nota em todas as categorias antes de enviar 🙂
         </p>
       </form>
 
@@ -91,6 +91,6 @@
       <p class="rodape">feito com carinho pro arraiá 🌽</p>
     </div>
 
-    <script type="module" src="../assets/formulario.js"></script>
+    <script type="module" src="../assets/formulario-juri.js"></script>
   </body>
 </html>

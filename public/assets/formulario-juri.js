@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, RESTAURANTES } from "../config.js";
+import {
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  RESTAURANTES,
+  CRITERIOS,
+} from "../config.js";
 
 const restauranteId = document.body.dataset.restaurante;
 const restaurante = RESTAURANTES[restauranteId] || {
@@ -15,10 +20,8 @@ document.getElementById("numComanda").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
-// Remove a linha "Você está avaliando: X" — o nome já vai aparecer embaixo da logo
 document.querySelector(".subt")?.remove();
 
-// Logo grande + nome do restaurante logo abaixo dela
 const cabecalho = document.querySelector(".cabecalho");
 if (restaurante.logo) {
   const carimbo = document.createElement("div");
@@ -41,41 +44,18 @@ if (restaurante.foto) {
   cabecalho.after(polaroid);
 }
 
-// Monta o seletor de nota única (0 a 10) dentro de .nota-publica-container
-const notaContainer = document.querySelector(".nota-publica-container");
-let notaEscolhida = null;
-
-function montarNotaUnica() {
-  notaContainer.innerHTML = `
-    <div class="nota-publica-label">De 0 a 10, qual sua nota pra esse boteco?</div>
-    <div class="nota-publica-grade" id="notaGrade"></div>
-    <div class="nota-publica-valor" id="notaValor">toque para avaliar</div>
+const categoriasContainer = document.querySelector(".categorias-container");
+CRITERIOS.forEach((crit) => {
+  const div = document.createElement("div");
+  div.className = "categoria";
+  div.dataset.cat = crit.chave;
+  div.innerHTML = `
+    <div class="categoria-label"><span class="icone">${crit.icone}</span> ${crit.label}</div>
+    <div class="tampinhas" data-nota="0"></div>
   `;
+  categoriasContainer.appendChild(div);
+});
 
-  const grade = document.getElementById("notaGrade");
-  const valorEl = document.getElementById("notaValor");
-
-  for (let n = 0; n <= 10; n++) {
-    const botao = document.createElement("button");
-    botao.type = "button";
-    botao.className = "nota-botao";
-    botao.textContent = n;
-    botao.dataset.valor = n;
-    botao.addEventListener("click", () => {
-      notaEscolhida = n;
-      grade
-        .querySelectorAll(".nota-botao")
-        .forEach((b) => b.classList.remove("selecionada"));
-      botao.classList.add("selecionada");
-      valorEl.textContent = `sua nota: ${n}`;
-    });
-    grade.appendChild(botao);
-  }
-}
-
-montarNotaUnica();
-
-// ---- Elementos já existentes no HTML (nada de criar duplicado) ----
 const telaCarregando = document.getElementById("telaCarregando");
 const telaLogin = document.getElementById("telaLogin");
 const form = document.getElementById("formAvaliacao");
@@ -119,11 +99,10 @@ btnTentarNovamente.addEventListener("click", () => {
   iniciar();
 });
 
-// Checa na tabela do PÚBLICO se esse usuário já avaliou esse restaurante
 async function verificarJaAvaliado(userId) {
   const { data, error } = await comTimeout(
     supabase
-      .from("avaliacoes_publico")
+      .from("avaliacoes_juri")
       .select("id")
       .eq("user_id", userId)
       .eq("restaurante_id", restauranteId)
@@ -164,6 +143,7 @@ async function iniciar() {
     }
 
     mostrarTela(form);
+    montarEstrelas();
   } catch (err) {
     console.error("Erro ao iniciar:", err);
     mostrarTela(telaCarregando);
@@ -175,6 +155,60 @@ async function iniciar() {
   }
 }
 
+function montarEstrelas() {
+  document.querySelectorAll(".tampinhas").forEach((container) => {
+    if (container.dataset.montado === "1") return;
+    container.dataset.montado = "1";
+    container.classList.add("estrelas");
+    container.dataset.nota = "0";
+    container.dataset.avaliado = "0";
+
+    for (let i = 1; i <= 5; i++) {
+      const estrela = document.createElement("div");
+      estrela.className = "estrela";
+      estrela.dataset.indice = i;
+      estrela.innerHTML = `
+        <span class="estrela-fundo">★</span>
+        <span class="estrela-preenchida" style="width:0%">★</span>
+        <button type="button" class="zona-meia zona-esquerda" data-valor="${i - 0.5}" aria-label="Nota ${i - 0.5}"></button>
+        <button type="button" class="zona-meia zona-direita" data-valor="${i}" aria-label="Nota ${i}"></button>
+      `;
+      container.appendChild(estrela);
+    }
+
+    const rotulo = document.createElement("div");
+    rotulo.className = "estrelas-valor";
+    rotulo.textContent = "toque para avaliar";
+    container.after(rotulo);
+
+    container.querySelectorAll(".zona-meia").forEach((botao) => {
+      botao.addEventListener("click", () => {
+        const valorClicado = Number(botao.dataset.valor);
+        const notaAtual = Number(container.dataset.nota);
+        const novaNota =
+          container.dataset.avaliado === "1" && valorClicado === notaAtual
+            ? 0
+            : valorClicado;
+
+        container.dataset.nota = novaNota;
+        container.dataset.avaliado = "1";
+
+        container.querySelectorAll(".estrela").forEach((estrela) => {
+          const idx = Number(estrela.dataset.indice);
+          const preench = Math.max(0, Math.min(1, novaNota - (idx - 1))) * 100;
+          estrela.querySelector(".estrela-preenchida").style.width =
+            preench + "%";
+        });
+
+        rotulo.textContent =
+          novaNota % 1 === 0
+            ? `nota: ${novaNota.toFixed(0)}`
+            : `nota: ${novaNota.toFixed(1)}`;
+      });
+    });
+  });
+}
+
 iniciar();
 supabase.auth.onAuthStateChange(() => iniciar());
 
@@ -182,8 +216,16 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
 
-  if (notaEscolhida === null) {
-    msgErro.textContent = "Dá uma nota de 0 a 10 antes de enviar 🙂";
+  const campos = CRITERIOS.map((crit) => ({
+    chave: crit.chave,
+    el: form.querySelector(`[data-cat="${crit.chave}"] .tampinhas`),
+  }));
+
+  const todasAvaliadas = campos.every((c) => c.el.dataset.avaliado === "1");
+
+  if (!todasAvaliadas) {
+    msgErro.textContent =
+      "Dá uma nota em todas as categorias antes de enviar 🙂";
     msgErro.style.display = "block";
     return;
   }
@@ -203,15 +245,20 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const notas = {};
+  campos.forEach((c) => {
+    notas[`nota_${c.chave}`] = Number(c.el.dataset.nota);
+  });
+
   const botao = form.querySelector(".enviar");
   botao.disabled = true;
   botao.textContent = "Enviando...";
 
-  const { error } = await supabase.from("avaliacoes_publico").insert({
+  const { error } = await supabase.from("avaliacoes_juri").insert({
     restaurante_id: restauranteId,
     restaurante_nome: restaurante.nome,
     user_id: session.user.id,
-    nota: notaEscolhida,
+    ...notas,
     comentario: document.getElementById("comentario").value.trim() || null,
   });
 

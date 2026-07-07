@@ -12,12 +12,23 @@ const conteudo = document.getElementById("conteudo");
 const atualizacao = document.getElementById("atualizacao");
 const acessoRapido = document.getElementById("acessoRapido");
 
+// Busca a logo de um restaurante a partir do nome vindo do Supabase
+function logoPorNome(nome) {
+  const entry = Object.values(RESTAURANTES).find((r) => r.nome === nome);
+  return entry?.logo || "";
+}
+
 // Monta os botões de acesso rápido a partir do config.js
+// (aponta pro formulário do PÚBLICO — o link dos jurados é enviado à parte)
 acessoRapido.innerHTML = Object.entries(RESTAURANTES)
   .map(
     ([id, r]) => `
   <a class="botao-restaurante" href="formularios/restaurante-${id}.html">
-    <span class="numero">${id}</span>
+    ${
+      r.logo
+        ? `<img class="logo-restaurante" src="${r.logo}" alt="Logo ${r.nome}" loading="lazy">`
+        : `<span class="numero">${id}</span>`
+    }
     <span class="nome">${r.nome}</span>
   </a>
 `,
@@ -53,10 +64,12 @@ renderHero();
 const MEDALHAS = ["🥇", "🥈", "🥉"];
 
 async function carregar() {
+  // ranking_final já traz: pontuacao_juri (máx 50) + pontuacao_publico (máx 50)
+  // = pontuacao_final (máx 100), além das médias por categoria do júri.
   const { data, error } = await supabase
-    .from("ranking_restaurantes")
+    .from("ranking_final")
     .select("*")
-    .order("media_geral", { ascending: false });
+    .order("pontuacao_final", { ascending: false });
 
   if (error) {
     conteudo.innerHTML = `<div class="pombinha">Erro ao carregar: ${error.message}</div>`;
@@ -64,7 +77,10 @@ async function carregar() {
   }
 
   const totalAvaliacoes = (data || []).reduce(
-    (acc, r) => acc + Number(r.total_avaliacoes || 0),
+    (acc, r) =>
+      acc +
+      Number(r.total_avaliacoes_juri || 0) +
+      Number(r.total_avaliacoes_publico || 0),
     0,
   );
   const statEl = document.getElementById("statAvaliacoes");
@@ -83,16 +99,25 @@ async function carregar() {
 
   const ranking = data
     .map((r, i) => {
-      const logo = RESTAURANTES[r.restaurante_id]?.logo;
+      const logo = logoPorNome(r.restaurante_nome);
       return `
     <div class="item ${i === 0 ? "primeiro" : ""}">
-      <div class="posicao">${i + 1}º</div>
-      ${logo ? `<div class="carimbo-logo-mini"><img src="${logo}" alt=""></div>` : ""}
+      <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
+      ${
+        logo
+          ? `<img class="logo-restaurante logo-restaurante-ranking" src="${logo}" alt="Logo ${r.restaurante_nome}" loading="lazy">`
+          : ""
+      }
       <div class="info">
-        <div class="nome">${r.restaurante_nome}</div>
-        <div class="meta">${r.total_avaliacoes} avaliações</div>
+        <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
+        <div class="meta">
+          ${r.total_avaliacoes_publico} avaliações do público · ${r.total_avaliacoes_juri} do júri
+        </div>
+        <div class="meta-pontos">
+          júri ${Number(r.pontuacao_juri).toFixed(1)}/50 · público ${Number(r.pontuacao_publico).toFixed(1)}/50
+        </div>
       </div>
-      <div class="media-geral">${Number(r.media_geral).toFixed(1)}</div>
+      <div class="media-geral">${Number(r.pontuacao_final).toFixed(1)}</div>
     </div>
   `;
     })
@@ -124,6 +149,7 @@ async function carregar() {
     .join("");
 
   conteudo.innerHTML = `
+    <p class="legenda-pontuacao">Pontuação final = nota do júri (máx 50) + nota do público (máx 50)</p>
     <div class="ranking">${ranking}</div>
     <div class="grid-categorias">${paineis}</div>
   `;
@@ -189,7 +215,7 @@ async function verificarAdmin() {
 
 btnResetPlacar.addEventListener("click", async () => {
   const confirmar = confirm(
-    "Tem certeza que quer apagar TODAS as avaliações? Essa ação não pode ser desfeita.",
+    "Tem certeza que quer apagar TODAS as avaliações (júri e público)? Essa ação não pode ser desfeita.",
   );
   if (!confirmar) return;
 
@@ -201,17 +227,24 @@ btnResetPlacar.addEventListener("click", async () => {
   btnResetPlacar.disabled = true;
   btnResetPlacar.textContent = "Resetando...";
 
-  const { error } = await supabase
-    .from("avaliacoes")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+  const [{ error: erroJuri }, { error: erroPublico }] = await Promise.all([
+    supabase
+      .from("avaliacoes_juri")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000"),
+    supabase
+      .from("avaliacoes_publico")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000"),
+  ]);
 
   btnResetPlacar.disabled = false;
   btnResetPlacar.textContent = "Resetar placar";
 
-  if (error) {
-    console.error(error);
-    adminMsg.textContent = "Erro ao resetar: " + error.message;
+  if (erroJuri || erroPublico) {
+    console.error(erroJuri, erroPublico);
+    adminMsg.textContent =
+      "Erro ao resetar: " + (erroJuri?.message || erroPublico?.message);
     return;
   }
 
