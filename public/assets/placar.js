@@ -39,9 +39,9 @@ acessoRapido.innerHTML = Object.entries(RESTAURANTES)
 // uma vez só — os números dentro são atualizados a cada carregar()
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
-    <span class="hero-selo">${EVENTO.edicao}</span>
+    <p class="hero-antetitulo">${EVENTO.antetitulo}</p>
     <h1 class="hero-nome">${EVENTO.nome}</h1>
-    <div class="hero-local">📍 ${EVENTO.local}</div>
+    <p class="hero-subtitulo">${EVENTO.local} · ${EVENTO.edicao}</p>
     <div class="hero-stats">
       <div class="stat">
         <span class="stat-num">${Object.keys(RESTAURANTES).length}</span>

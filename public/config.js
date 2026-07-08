@@ -10,8 +10,9 @@ export const SUPABASE_ANON_KEY =
   "sb_publishable_bHt1HT7PA-LyYjZkmN3xMg_PYzNTtF-";
 
 export const EVENTO = {
-  nome: "Primeiro Festival de Comida de Boteco - Concurso",
-  local: "Água Boa, MG",
+  antetitulo: "Primeiro Festival de",
+  nome: "Comida de Boteco",
+  local: "Água Boa",
   edicao: "1ª Edição",
 };
 export const CRITERIOS = [
