@@ -41,11 +41,11 @@ function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
     <p class="hero-antetitulo">${EVENTO.antetitulo}</p>
     <h1 class="hero-nome">${EVENTO.nome}</h1>
-    <p class="hero-subtitulo">${EVENTO.local} · ${EVENTO.edicao}</p>
+    <p class="hero-subtitulo">${EVENTO.local} - ${EVENTO.edicao}</p>
     <div class="hero-stats">
       <div class="stat">
         <span class="stat-num">${Object.keys(RESTAURANTES).length}</span>
-        <span class="stat-label">barracas</span>
+        <span class="stat-label">restaurantes</span>
       </div>
       <div class="stat">
         <span class="stat-num" id="statAvaliacoes">0</span>

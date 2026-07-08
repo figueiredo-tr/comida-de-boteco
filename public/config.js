@@ -12,7 +12,7 @@ export const SUPABASE_ANON_KEY =
 export const EVENTO = {
   antetitulo: "Primeiro Festival de",
   nome: "Comida de Boteco",
-  local: "Água Boa",
+  local: "Água Boa/MG",
   edicao: "1ª Edição",
 };
 export const CRITERIOS = [
