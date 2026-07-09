@@ -458,6 +458,46 @@ body {
   margin: 0 0 16px;
 }
 
+/* ===== Clima de arraiá (preenche o espaço vazio do dashboard) ===== */
+.arraia-clima {
+  text-align: center;
+  margin: 8px 0 32px;
+  padding: 28px 20px;
+  border: 1px dashed rgba(232, 169, 59, 0.4);
+  border-radius: 14px;
+  background: rgba(243, 236, 216, 0.03);
+}
+.arraia-clima-icones {
+  font-size: 30px;
+  letter-spacing: 10px;
+  margin-bottom: 10px;
+}
+.arraia-clima h3 {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 20px;
+  color: var(--mostarda);
+  margin: 0 0 8px;
+}
+.arraia-clima p {
+  font-size: 13.5px;
+  color: rgba(243, 236, 216, 0.6);
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ===== Rodapé ===== */
+.rodape-pagina {
+  text-align: center;
+  margin: 8px 0 20px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: rgba(232, 169, 59, 0.55);
+}
+
 /* ===== Cabeçalho exclusivo do relatório em PDF ===== */
 .pdf-wrapper {
   background: var(--verde-quadro-escuro);
