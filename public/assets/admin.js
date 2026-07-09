@@ -150,24 +150,57 @@ btnResetPlacar.addEventListener("click", async () => {
 });
 
 btnExportarPDF.addEventListener("click", () => {
-  const dataEvento = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
+  const agora = new Date();
+  const dataArquivo = agora.toLocaleDateString("pt-BR").replace(/\//g, "-");
+  const dataExtenso =
+    agora.toLocaleDateString("pt-BR") +
+    " às " +
+    agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
   btnExportarPDF.disabled = true;
   btnExportarPDF.textContent = "Gerando PDF...";
 
+  // Monta um documento dedicado pro PDF: largura fixa (proporcional à
+  // folha A4) + cabeçalho com nome do evento, pra não depender do
+  // tamanho da tela de quem clicou em exportar e pra ficar com layout
+  // profissional (não só o placar cru).
+  const wrapper = document.createElement("div");
+  wrapper.className = "pdf-wrapper";
+  wrapper.style.width = "794px"; // ~ largura A4 a 96dpi
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-9999px";
+  wrapper.style.top = "0";
+
+  wrapper.innerHTML = `
+    <div class="pdf-cabecalho">
+      <p class="pdf-antetitulo">${EVENTO.antetitulo}</p>
+      <h1 class="pdf-nome-evento">${EVENTO.nome}</h1>
+      <p class="pdf-subtitulo-evento">${EVENTO.local} - ${EVENTO.edicao}</p>
+      <span class="pdf-titulo-relatorio">Relatório detalhado do evento</span>
+      <p class="pdf-gerado-em">Gerado em ${dataExtenso}</p>
+    </div>
+  `;
+  wrapper.innerHTML += document.getElementById("relatorio").innerHTML;
+
+  document.body.appendChild(wrapper);
+
   html2pdf()
-    .from(document.getElementById("relatorio"))
+    .from(wrapper)
     .set({
-      filename: `relatorio-comida-de-boteco-${dataEvento}.pdf`,
-      margin: 10,
+      filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
+      margin: [10, 8, 10, 8],
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       html2canvas: {
         scale: 2,
         backgroundColor: "#141d18",
         useCORS: true,
+        windowWidth: 794,
       },
+      pagebreak: { mode: ["css", "legacy"], avoid: [".item", ".painel"] },
     })
     .save()
     .then(() => {
+      document.body.removeChild(wrapper);
       btnExportarPDF.disabled = false;
       btnExportarPDF.textContent = "📄 Exportar PDF";
     });

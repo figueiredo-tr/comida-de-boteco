@@ -64,6 +64,16 @@ body {
   position: relative;
   overflow: hidden;
 }
+.banner-festival {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 169, 59, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  margin-bottom: 20px;
+}
 .hero-antetitulo {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
@@ -280,6 +290,8 @@ body {
   border: 1px solid rgba(243, 236, 216, 0.1);
   border-radius: 6px;
   padding: 14px 16px;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .item.primeiro {
   border-color: rgba(232, 169, 59, 0.6);
@@ -345,6 +357,8 @@ body {
   border: 1px solid rgba(243, 236, 216, 0.1);
   border-radius: 8px;
   padding: 18px 18px 8px;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .painel h2 {
   font-family: "JetBrains Mono", monospace;
@@ -442,4 +456,57 @@ body {
   font-size: 11px;
   color: rgba(243, 236, 216, 0.45);
   margin: 0 0 16px;
+}
+
+/* ===== Cabeçalho exclusivo do relatório em PDF ===== */
+.pdf-wrapper {
+  background: var(--verde-quadro-escuro);
+  padding: 28px;
+}
+.pdf-cabecalho {
+  text-align: center;
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 2px solid rgba(232, 169, 59, 0.4);
+}
+.pdf-antetitulo {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(243, 236, 216, 0.7);
+  margin: 0 0 4px;
+}
+.pdf-nome-evento {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: 34px;
+  text-transform: uppercase;
+  color: var(--mostarda);
+  margin: 0 0 6px;
+  line-height: 1.1;
+}
+.pdf-subtitulo-evento {
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 13px;
+  color: rgba(243, 236, 216, 0.65);
+  margin: 0 0 14px;
+}
+.pdf-titulo-relatorio {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--verde-quadro-escuro);
+  background: var(--mostarda);
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+.pdf-gerado-em {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  color: rgba(243, 236, 216, 0.4);
+  margin: 14px 0 0;
 }
