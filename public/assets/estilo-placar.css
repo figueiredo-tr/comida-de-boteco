@@ -38,6 +38,15 @@ body {
   margin: 0 auto;
 }
 
+/* Fundo próprio pro relatório (independente do body) — sem isso, o
+   html2canvas/html2pdf.js captura essa área com fundo branco na hora
+   de exportar o PDF, deixando o texto claro ilegível. */
+#relatorio {
+  background: var(--verde-quadro-escuro);
+  border-radius: 12px;
+  padding: 16px;
+}
+
 /* ===== Herói do festival ===== */
 .hero-festival {
   text-align: center;

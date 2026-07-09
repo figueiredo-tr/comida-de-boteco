@@ -160,7 +160,11 @@ btnExportarPDF.addEventListener("click", () => {
       filename: `relatorio-comida-de-boteco-${dataEvento}.pdf`,
       margin: 10,
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      html2canvas: { scale: 2 },
+      html2canvas: {
+        scale: 2,
+        backgroundColor: "#141d18",
+        useCORS: true,
+      },
     })
     .save()
     .then(() => {
