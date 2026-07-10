@@ -550,3 +550,43 @@ body {
   color: rgba(243, 236, 216, 0.4);
   margin: 14px 0 0;
 }
+
+/* Compacta espaçamentos só na exportação (a tela do admin continua
+   igual), pra aproveitar melhor a página e sobrar menos espaço em
+   branco quando um painel é empurrado inteiro pra próxima página. */
+#relatorio.pdf-wrapper .pdf-cabecalho {
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+#relatorio.pdf-wrapper .pdf-nome-evento {
+  font-size: 26px;
+}
+#relatorio.pdf-wrapper .pdf-subtitulo-evento {
+  margin: 0 0 10px;
+}
+#relatorio.pdf-wrapper .pdf-gerado-em {
+  margin: 8px 0 0;
+}
+#relatorio.pdf-wrapper .legenda-pontuacao {
+  margin: 0 0 10px;
+}
+#relatorio.pdf-wrapper .ranking {
+  gap: 7px;
+  margin-bottom: 16px;
+}
+#relatorio.pdf-wrapper .item {
+  padding: 9px 14px;
+}
+#relatorio.pdf-wrapper .painel {
+  padding: 12px 14px 4px;
+  margin-bottom: 8px;
+}
+#relatorio.pdf-wrapper .painel h2 {
+  margin-bottom: 6px;
+}
+#relatorio.pdf-wrapper .barra-linha {
+  margin-bottom: 7px;
+}
+#relatorio.pdf-wrapper .barra-topo {
+  margin-bottom: 3px;
+}
