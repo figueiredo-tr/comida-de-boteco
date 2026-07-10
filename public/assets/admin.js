@@ -153,6 +153,13 @@ btnResetPlacar.addEventListener("click", async () => {
 });
 
 btnExportarPDF.addEventListener("click", () => {
+  if (typeof html2pdf !== "function") {
+    alert(
+      "A biblioteca de PDF não carregou. Verifica sua conexão e recarrega a página pra tentar de novo.",
+    );
+    return;
+  }
+
   const agora = new Date();
   const dataArquivo = agora.toLocaleDateString("pt-BR").replace(/\//g, "-");
   const dataExtenso =
@@ -163,47 +170,66 @@ btnExportarPDF.addEventListener("click", () => {
   btnExportarPDF.disabled = true;
   btnExportarPDF.textContent = "Gerando PDF...";
 
-  // Monta um documento dedicado pro PDF: largura fixa (proporcional à
-  // folha A4) + cabeçalho com nome do evento, pra não depender do
-  // tamanho da tela de quem clicou em exportar e pra ficar com layout
-  // profissional (não só o placar cru).
-  const wrapper = document.createElement("div");
-  wrapper.className = "pdf-wrapper";
-  wrapper.style.width = "794px"; // ~ largura A4 a 96dpi
-  wrapper.style.position = "fixed";
-  wrapper.style.left = "-9999px";
-  wrapper.style.top = "0";
+  const relatorioEl = document.getElementById("relatorio");
 
-  wrapper.innerHTML = `
-    <div class="pdf-cabecalho">
-      <p class="pdf-antetitulo">${EVENTO.antetitulo}</p>
-      <h1 class="pdf-nome-evento">${EVENTO.nome}</h1>
-      <p class="pdf-subtitulo-evento">${EVENTO.local} - ${EVENTO.edicao}</p>
-      <span class="pdf-titulo-relatorio">Relatório detalhado do evento</span>
-      <p class="pdf-gerado-em">Gerado em ${dataExtenso}</p>
-    </div>
+  // Cabeçalho profissional (nome do evento + título do relatório),
+  // inserido de verdade dentro do relatório (não fora da tela — o
+  // html2canvas falha em capturar elementos posicionados fora da
+  // viewport) e removido logo depois de gerar o PDF.
+  const cabecalho = document.createElement("div");
+  cabecalho.className = "pdf-cabecalho";
+  cabecalho.innerHTML = `
+    <p class="pdf-antetitulo">${EVENTO.antetitulo}</p>
+    <h1 class="pdf-nome-evento">${EVENTO.nome}</h1>
+    <p class="pdf-subtitulo-evento">${EVENTO.local} - ${EVENTO.edicao}</p>
+    <span class="pdf-titulo-relatorio">Relatório detalhado do evento</span>
+    <p class="pdf-gerado-em">Gerado em ${dataExtenso}</p>
   `;
-  wrapper.innerHTML += document.getElementById("relatorio").innerHTML;
+  relatorioEl.insertBefore(cabecalho, relatorioEl.firstChild);
+  relatorioEl.classList.add("pdf-wrapper");
 
-  document.body.appendChild(wrapper);
+  // Largura fixa de verdade no elemento (não "windowWidth" simulado,
+  // que bagunça o cálculo de escala do html2pdf) — garante o mesmo
+  // resultado não importa o tamanho da tela de quem exportou.
+  const larguraOriginal = relatorioEl.style.width;
+  relatorioEl.style.width = "700px";
+
+  // Reforça "não quebrar no meio" via estilo INLINE em cada card. O
+  // html2pdf.js decide isso lendo o CSS computado do elemento, mas o
+  // processo de clonagem dele (pra capturar) tem bug conhecido pra
+  // carregar folha de estilo externa direito — estilo inline garante
+  // que a regra sobrevive à clonagem de qualquer forma.
+  const elementosSemQuebra = relatorioEl.querySelectorAll(".item, .painel");
+  elementosSemQuebra.forEach((el) => {
+    el.style.pageBreakInside = "avoid";
+    el.style.breakInside = "avoid";
+  });
 
   html2pdf()
-    .from(wrapper)
+    .from(relatorioEl)
     .set({
       filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
-      margin: [10, 8, 10, 8],
+      margin: [8, 5, 8, 5],
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       html2canvas: {
         scale: 2,
         backgroundColor: "#141d18",
         useCORS: true,
-        windowWidth: 794,
       },
       pagebreak: { mode: ["css", "legacy"], avoid: [".item", ".painel"] },
     })
     .save()
-    .then(() => {
-      document.body.removeChild(wrapper);
+    .catch((err) => {
+      console.error("Erro ao gerar PDF:", err);
+      alert(
+        "Deu ruim ao gerar o PDF:\n\n" +
+          (err && err.message ? err.message : String(err)),
+      );
+    })
+    .finally(() => {
+      cabecalho.remove();
+      relatorioEl.classList.remove("pdf-wrapper");
+      relatorioEl.style.width = larguraOriginal;
       btnExportarPDF.disabled = false;
       btnExportarPDF.textContent = "📄 Exportar PDF";
     });
