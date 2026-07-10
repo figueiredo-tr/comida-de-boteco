@@ -342,6 +342,17 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 18px;
 }
+/* No PDF, a quebra de página "empurra" o elemento pro fim usando um
+   espaçador — isso só funciona em fluxo normal de bloco, não dentro de
+   um grid de 2 colunas (o espaçador vira só mais um item da grade em
+   vez de empurrar pra baixo). Por isso, na exportação, empilhamos os
+   painéis numa coluna só. */
+#relatorio.pdf-wrapper .grid-categorias {
+  display: block;
+}
+#relatorio.pdf-wrapper .painel {
+  margin-bottom: 14px;
+}
 .painel {
   background: rgba(243, 236, 216, 0.05);
   border: 1px solid rgba(243, 236, 216, 0.1);
