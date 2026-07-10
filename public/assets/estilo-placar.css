@@ -499,28 +499,6 @@ body {
   color: rgba(232, 169, 59, 0.55);
 }
 
-.rodape-apoio {
-  margin-top: 30px;
-  padding-top: 22px;
-  border-top: 1px dashed rgba(232, 169, 59, 0.3);
-  text-align: center;
-}
-.rodape-apoio-titulo {
-  display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(243, 236, 216, 0.5);
-  margin-bottom: 12px;
-}
-.rodape-apoio img {
-  max-width: 320px;
-  width: 100%;
-  height: auto;
-  border-radius: 999px;
-}
-
 /* ===== Cabeçalho exclusivo do relatório em PDF ===== */
 #relatorio.pdf-wrapper {
   padding: 24px;
