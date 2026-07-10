@@ -191,11 +191,22 @@ btnExportarPDF.addEventListener("click", () => {
   const larguraOriginal = relatorioEl.style.width;
   relatorioEl.style.width = "700px";
 
+  // Reforça "não quebrar no meio" via estilo INLINE em cada card. O
+  // html2pdf.js decide isso lendo o CSS computado do elemento, mas o
+  // processo de clonagem dele (pra capturar) tem bug conhecido pra
+  // carregar folha de estilo externa direito — estilo inline garante
+  // que a regra sobrevive à clonagem de qualquer forma.
+  const elementosSemQuebra = relatorioEl.querySelectorAll(".item, .painel");
+  elementosSemQuebra.forEach((el) => {
+    el.style.pageBreakInside = "avoid";
+    el.style.breakInside = "avoid";
+  });
+
   html2pdf()
     .from(relatorioEl)
     .set({
       filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
-      margin: [10, 8, 10, 8],
+      margin: [8, 5, 8, 5],
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       html2canvas: {
         scale: 2,
