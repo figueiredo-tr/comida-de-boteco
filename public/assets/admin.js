@@ -182,13 +182,23 @@ btnExportarPDF.addEventListener("click", async () => {
     // é bugada, e o "encaixe" automático dela estava deixando o
     // conteúdo pequeno e cortado. Fazendo na mão, controlamos a escala
     // e a paginação com precisão.
+    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
+    if (typeof html2canvas !== "function" || !JsPDF) {
+      throw new Error(
+        "As bibliotecas de PDF não carregaram (html2canvas: " +
+          typeof html2canvas +
+          ", jsPDF: " +
+          (JsPDF ? "ok" : "ausente") +
+          "). Verifica se o script do html2pdf.js está incluído na página.",
+      );
+    }
+
     const canvas = await html2canvas(relatorioEl, {
       scale: 2,
       backgroundColor: "#141d18",
       useCORS: true,
     });
 
-    const JsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
     const pdf = new JsPDF({
       unit: "mm",
       format: "a4",
@@ -228,7 +238,10 @@ btnExportarPDF.addEventListener("click", async () => {
     pdf.save(`relatorio-comida-de-boteco-${dataArquivo}.pdf`);
   } catch (err) {
     console.error("Erro ao gerar PDF:", err);
-    alert("Deu ruim ao gerar o PDF. Tenta de novo?");
+    alert(
+      "Deu ruim ao gerar o PDF:\n\n" +
+        (err && err.message ? err.message : String(err)),
+    );
   } finally {
     cabecalho.remove();
     relatorioEl.classList.remove("pdf-wrapper");
