@@ -160,32 +160,26 @@ btnExportarPDF.addEventListener("click", () => {
   btnExportarPDF.disabled = true;
   btnExportarPDF.textContent = "Gerando PDF...";
 
-  // Monta um documento dedicado pro PDF: largura fixa (proporcional à
-  // folha A4) + cabeçalho com nome do evento, pra não depender do
-  // tamanho da tela de quem clicou em exportar e pra ficar com layout
-  // profissional (não só o placar cru).
-  const wrapper = document.createElement("div");
-  wrapper.className = "pdf-wrapper";
-  wrapper.style.width = "794px"; // ~ largura A4 a 96dpi
-  wrapper.style.position = "fixed";
-  wrapper.style.left = "-9999px";
-  wrapper.style.top = "0";
+  const relatorioEl = document.getElementById("relatorio");
 
-  wrapper.innerHTML = `
-    <div class="pdf-cabecalho">
-      <p class="pdf-antetitulo">${EVENTO.antetitulo}</p>
-      <h1 class="pdf-nome-evento">${EVENTO.nome}</h1>
-      <p class="pdf-subtitulo-evento">${EVENTO.local} - ${EVENTO.edicao}</p>
-      <span class="pdf-titulo-relatorio">Relatório detalhado do evento</span>
-      <p class="pdf-gerado-em">Gerado em ${dataExtenso}</p>
-    </div>
+  // Em vez de montar o conteúdo num elemento fora da tela (o
+  // html2canvas tem bug conhecido pra capturar elementos posicionados
+  // fora da viewport e gera PDF em branco), inserimos o cabeçalho de
+  // verdade dentro do relatório, geramos o PDF, e removemos em seguida.
+  const cabecalho = document.createElement("div");
+  cabecalho.className = "pdf-cabecalho";
+  cabecalho.innerHTML = `
+    <p class="pdf-antetitulo">${EVENTO.antetitulo}</p>
+    <h1 class="pdf-nome-evento">${EVENTO.nome}</h1>
+    <p class="pdf-subtitulo-evento">${EVENTO.local} - ${EVENTO.edicao}</p>
+    <span class="pdf-titulo-relatorio">Relatório detalhado do evento</span>
+    <p class="pdf-gerado-em">Gerado em ${dataExtenso}</p>
   `;
-  wrapper.innerHTML += document.getElementById("relatorio").innerHTML;
-
-  document.body.appendChild(wrapper);
+  relatorioEl.insertBefore(cabecalho, relatorioEl.firstChild);
+  relatorioEl.classList.add("pdf-wrapper");
 
   html2pdf()
-    .from(wrapper)
+    .from(relatorioEl)
     .set({
       filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
       margin: [10, 8, 10, 8],
@@ -194,13 +188,14 @@ btnExportarPDF.addEventListener("click", () => {
         scale: 2,
         backgroundColor: "#141d18",
         useCORS: true,
-        windowWidth: 794,
+        windowWidth: 900,
       },
       pagebreak: { mode: ["css", "legacy"], avoid: [".item", ".painel"] },
     })
     .save()
     .then(() => {
-      document.body.removeChild(wrapper);
+      cabecalho.remove();
+      relatorioEl.classList.remove("pdf-wrapper");
       btnExportarPDF.disabled = false;
       btnExportarPDF.textContent = "📄 Exportar PDF";
     });

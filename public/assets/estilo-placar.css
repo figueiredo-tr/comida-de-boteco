@@ -498,10 +498,10 @@ body {
   color: rgba(232, 169, 59, 0.55);
 }
 
+
 /* ===== Cabeçalho exclusivo do relatório em PDF ===== */
-.pdf-wrapper {
-  background: var(--verde-quadro-escuro);
-  padding: 28px;
+#relatorio.pdf-wrapper {
+  padding: 24px;
 }
 .pdf-cabecalho {
   text-align: center;
