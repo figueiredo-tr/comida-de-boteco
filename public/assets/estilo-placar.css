@@ -64,16 +64,6 @@ body {
   position: relative;
   overflow: hidden;
 }
-.banner-festival {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  border-radius: 14px;
-  border: 1px solid rgba(232, 169, 59, 0.35);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  margin-bottom: 20px;
-}
 .hero-antetitulo {
   font-family: "JetBrains Mono", monospace;
   font-size: 13px;
@@ -497,7 +487,6 @@ body {
   letter-spacing: 0.5px;
   color: rgba(232, 169, 59, 0.55);
 }
-
 
 /* ===== Cabeçalho exclusivo do relatório em PDF ===== */
 #relatorio.pdf-wrapper {
