@@ -149,7 +149,14 @@ btnResetPlacar.addEventListener("click", async () => {
   carregar();
 });
 
-btnExportarPDF.addEventListener("click", async () => {
+btnExportarPDF.addEventListener("click", () => {
+  if (typeof html2pdf !== "function") {
+    alert(
+      "A biblioteca de PDF não carregou. Verifica sua conexão e recarrega a página pra tentar de novo.",
+    );
+    return;
+  }
+
   const agora = new Date();
   const dataArquivo = agora.toLocaleDateString("pt-BR").replace(/\//g, "-");
   const dataExtenso =
@@ -162,6 +169,10 @@ btnExportarPDF.addEventListener("click", async () => {
 
   const relatorioEl = document.getElementById("relatorio");
 
+  // Cabeçalho profissional (nome do evento + título do relatório),
+  // inserido de verdade dentro do relatório (não fora da tela — o
+  // html2canvas falha em capturar elementos posicionados fora da
+  // viewport) e removido logo depois de gerar o PDF.
   const cabecalho = document.createElement("div");
   cabecalho.className = "pdf-cabecalho";
   cabecalho.innerHTML = `
@@ -173,82 +184,41 @@ btnExportarPDF.addEventListener("click", async () => {
   `;
   relatorioEl.insertBefore(cabecalho, relatorioEl.firstChild);
   relatorioEl.classList.add("pdf-wrapper");
+
+  // Largura fixa de verdade no elemento (não "windowWidth" simulado,
+  // que bagunça o cálculo de escala do html2pdf) — garante o mesmo
+  // resultado não importa o tamanho da tela de quem exportou.
+  const larguraOriginal = relatorioEl.style.width;
   relatorioEl.style.width = "700px";
 
-  try {
-    // Montamos o PDF na mão (html2canvas + jsPDF direto), sem passar
-    // pelo pipeline automático do html2pdf.js: a própria documentação da
-    // lib admite que a forma como ela clona o conteúdo antes de capturar
-    // é bugada, e o "encaixe" automático dela estava deixando o
-    // conteúdo pequeno e cortado. Fazendo na mão, controlamos a escala
-    // e a paginação com precisão.
-    const JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
-    if (typeof html2canvas !== "function" || !JsPDF) {
-      throw new Error(
-        "As bibliotecas de PDF não carregaram (html2canvas: " +
-          typeof html2canvas +
-          ", jsPDF: " +
-          (JsPDF ? "ok" : "ausente") +
-          "). Verifica se o script do html2pdf.js está incluído na página.",
+  html2pdf()
+    .from(relatorioEl)
+    .set({
+      filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
+      margin: [10, 8, 10, 8],
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      html2canvas: {
+        scale: 2,
+        backgroundColor: "#141d18",
+        useCORS: true,
+      },
+      pagebreak: { mode: ["css", "legacy"], avoid: [".item", ".painel"] },
+    })
+    .save()
+    .catch((err) => {
+      console.error("Erro ao gerar PDF:", err);
+      alert(
+        "Deu ruim ao gerar o PDF:\n\n" +
+          (err && err.message ? err.message : String(err)),
       );
-    }
-
-    const canvas = await html2canvas(relatorioEl, {
-      scale: 2,
-      backgroundColor: "#141d18",
-      useCORS: true,
+    })
+    .finally(() => {
+      cabecalho.remove();
+      relatorioEl.classList.remove("pdf-wrapper");
+      relatorioEl.style.width = larguraOriginal;
+      btnExportarPDF.disabled = false;
+      btnExportarPDF.textContent = "📄 Exportar PDF";
     });
-
-    const pdf = new JsPDF({
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margemX = 8;
-    const margemY = 10;
-    const larguraUtil = pageWidth - margemX * 2;
-    const alturaUtil = pageHeight - margemY * 2;
-
-    const alturaImagemMM = (canvas.height * larguraUtil) / canvas.width;
-    const imgData = canvas.toDataURL("image/png");
-
-    let alturaRestante = alturaImagemMM;
-    let deslocamentoY = 0;
-
-    pdf.addImage(imgData, "PNG", margemX, margemY, larguraUtil, alturaImagemMM);
-    alturaRestante -= alturaUtil;
-
-    while (alturaRestante > 0) {
-      deslocamentoY += alturaUtil;
-      pdf.addPage();
-      pdf.addImage(
-        imgData,
-        "PNG",
-        margemX,
-        margemY - deslocamentoY,
-        larguraUtil,
-        alturaImagemMM,
-      );
-      alturaRestante -= alturaUtil;
-    }
-
-    pdf.save(`relatorio-comida-de-boteco-${dataArquivo}.pdf`);
-  } catch (err) {
-    console.error("Erro ao gerar PDF:", err);
-    alert(
-      "Deu ruim ao gerar o PDF:\n\n" +
-        (err && err.message ? err.message : String(err)),
-    );
-  } finally {
-    cabecalho.remove();
-    relatorioEl.classList.remove("pdf-wrapper");
-    relatorioEl.style.width = "";
-    btnExportarPDF.disabled = false;
-    btnExportarPDF.textContent = "📄 Exportar PDF";
-  }
 });
 
 async function verificarAdmin() {
