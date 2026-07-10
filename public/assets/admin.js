@@ -149,7 +149,7 @@ btnResetPlacar.addEventListener("click", async () => {
   carregar();
 });
 
-btnExportarPDF.addEventListener("click", () => {
+btnExportarPDF.addEventListener("click", async () => {
   const agora = new Date();
   const dataArquivo = agora.toLocaleDateString("pt-BR").replace(/\//g, "-");
   const dataExtenso =
@@ -162,10 +162,6 @@ btnExportarPDF.addEventListener("click", () => {
 
   const relatorioEl = document.getElementById("relatorio");
 
-  // Em vez de montar o conteúdo num elemento fora da tela (o
-  // html2canvas tem bug conhecido pra capturar elementos posicionados
-  // fora da viewport e gera PDF em branco), inserimos o cabeçalho de
-  // verdade dentro do relatório, geramos o PDF, e removemos em seguida.
   const cabecalho = document.createElement("div");
   cabecalho.className = "pdf-cabecalho";
   cabecalho.innerHTML = `
@@ -177,28 +173,69 @@ btnExportarPDF.addEventListener("click", () => {
   `;
   relatorioEl.insertBefore(cabecalho, relatorioEl.firstChild);
   relatorioEl.classList.add("pdf-wrapper");
+  relatorioEl.style.width = "700px";
 
-  html2pdf()
-    .from(relatorioEl)
-    .set({
-      filename: `relatorio-comida-de-boteco-${dataArquivo}.pdf`,
-      margin: [10, 8, 10, 8],
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      html2canvas: {
-        scale: 2,
-        backgroundColor: "#141d18",
-        useCORS: true,
-        windowWidth: 900,
-      },
-      pagebreak: { mode: ["css", "legacy"], avoid: [".item", ".painel"] },
-    })
-    .save()
-    .then(() => {
-      cabecalho.remove();
-      relatorioEl.classList.remove("pdf-wrapper");
-      btnExportarPDF.disabled = false;
-      btnExportarPDF.textContent = "📄 Exportar PDF";
+  try {
+    // Montamos o PDF na mão (html2canvas + jsPDF direto), sem passar
+    // pelo pipeline automático do html2pdf.js: a própria documentação da
+    // lib admite que a forma como ela clona o conteúdo antes de capturar
+    // é bugada, e o "encaixe" automático dela estava deixando o
+    // conteúdo pequeno e cortado. Fazendo na mão, controlamos a escala
+    // e a paginação com precisão.
+    const canvas = await html2canvas(relatorioEl, {
+      scale: 2,
+      backgroundColor: "#141d18",
+      useCORS: true,
     });
+
+    const JsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+    const pdf = new JsPDF({
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margemX = 8;
+    const margemY = 10;
+    const larguraUtil = pageWidth - margemX * 2;
+    const alturaUtil = pageHeight - margemY * 2;
+
+    const alturaImagemMM = (canvas.height * larguraUtil) / canvas.width;
+    const imgData = canvas.toDataURL("image/png");
+
+    let alturaRestante = alturaImagemMM;
+    let deslocamentoY = 0;
+
+    pdf.addImage(imgData, "PNG", margemX, margemY, larguraUtil, alturaImagemMM);
+    alturaRestante -= alturaUtil;
+
+    while (alturaRestante > 0) {
+      deslocamentoY += alturaUtil;
+      pdf.addPage();
+      pdf.addImage(
+        imgData,
+        "PNG",
+        margemX,
+        margemY - deslocamentoY,
+        larguraUtil,
+        alturaImagemMM,
+      );
+      alturaRestante -= alturaUtil;
+    }
+
+    pdf.save(`relatorio-comida-de-boteco-${dataArquivo}.pdf`);
+  } catch (err) {
+    console.error("Erro ao gerar PDF:", err);
+    alert("Deu ruim ao gerar o PDF. Tenta de novo?");
+  } finally {
+    cabecalho.remove();
+    relatorioEl.classList.remove("pdf-wrapper");
+    relatorioEl.style.width = "";
+    btnExportarPDF.disabled = false;
+    btnExportarPDF.textContent = "📄 Exportar PDF";
+  }
 });
 
 async function verificarAdmin() {
