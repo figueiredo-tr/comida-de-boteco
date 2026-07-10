@@ -153,12 +153,9 @@ btnResetPlacar.addEventListener("click", async () => {
 });
 
 btnExportarPDF.addEventListener("click", () => {
-  if (typeof html2pdf !== "function") {
-    alert(
-      "A biblioteca de PDF não carregou. Verifica sua conexão e recarrega a página pra tentar de novo.",
-    );
-    return;
-  }
+  document.title = `relatorio-comida-de-boteco-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`;
+  window.print();
+});
 
   const agora = new Date();
   const dataArquivo = agora.toLocaleDateString("pt-BR").replace(/\//g, "-");

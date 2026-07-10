@@ -590,3 +590,55 @@ body {
 #relatorio.pdf-wrapper .barra-topo {
   margin-bottom: 3px;
 }
+/* ===== Modo impressão / exportação de PDF ===== */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: var(--verde-quadro-escuro) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding: 0 !important;
+  }
+
+  /* Esconde tudo que não faz parte do relatório */
+  .area-admin-login,
+  .admin-acoes,
+  .atualizacao,
+  .banner-festival {
+    display: none !important;
+  }
+
+  /* Usa a página inteira, sem o visual de "cartão" flutuante */
+  .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  #relatorio {
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  /* As 4 categorias sempre juntas, em 2 colunas, numa página só */
+  .grid-categorias {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Nenhum item ou painel é cortado no meio */
+  .item,
+  .painel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
