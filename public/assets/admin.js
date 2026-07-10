@@ -7,7 +7,10 @@ import {
 } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const ADMIN_EMAIL = "andrefigueiredo.v@gmail.com";
+const ADMIN_EMAILS = [
+  "andrefigueiredo.v@gmail.com",
+  "culturaeturismo@aguaboa.mg.gov.br",
+];
 
 const conteudo = document.getElementById("conteudo");
 const atualizacao = document.getElementById("atualizacao");
@@ -237,7 +240,7 @@ async function verificarAdmin() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const ehAdmin = session?.user?.email === ADMIN_EMAIL;
+  const ehAdmin = ADMIN_EMAILS.includes(session?.user?.email);
 
   if (ehAdmin) {
     areaLogin.style.display = "none";

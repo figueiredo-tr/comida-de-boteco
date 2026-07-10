@@ -91,7 +91,7 @@ async function carregar() {
       <div class="vazio">
         <div class="vazio-icone">🍻</div>
         <div class="vazio-titulo">Ainda sem avaliações</div>
-        <p class="vazio-texto">Escaneie o QR code de uma barraca e seja o primeiro a avaliar!</p>
+        <p class="vazio-texto">Escaneie o QR code de um restaurante e seja o primeiro a avaliar!</p>
       </div>
     `;
     return;
