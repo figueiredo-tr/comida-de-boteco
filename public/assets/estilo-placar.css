@@ -590,3 +590,73 @@ body {
 #relatorio.pdf-wrapper .barra-topo {
   margin-bottom: 3px;
 }
+/* ===== CTA de destaque: Boteco Revelação ===== */
+.revelacao-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  margin: 4px auto 28px;
+  max-width: 420px;
+  padding: 26px 24px 24px;
+  border: 1px solid rgba(232, 169, 59, 0.45);
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(232, 169, 59, 0.18),
+      transparent 65%
+    ),
+    rgba(243, 236, 216, 0.04);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.revelacao-cta:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 169, 59, 0.75);
+}
+.revelacao-cta-selo {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--vermelho);
+  color: var(--papel);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+  animation: pulso-selo 2s infinite;
+}
+@keyframes pulso-selo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(193, 67, 46, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(193, 67, 46, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(193, 67, 46, 0);
+  }
+}
+.revelacao-cta-icone {
+  font-size: 36px;
+  margin-bottom: 6px;
+}
+.revelacao-cta-titulo {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 24px;
+  color: var(--mostarda);
+  margin-bottom: 6px;
+}
+.revelacao-cta-texto {
+  font-size: 13px;
+  color: rgba(243, 236, 216, 0.6);
+  max-width: 300px;
+  line-height: 1.4;
+}
