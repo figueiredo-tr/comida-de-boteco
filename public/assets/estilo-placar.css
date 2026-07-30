@@ -656,3 +656,16 @@ body {
   max-width: 280px;
   line-height: 1.4;
 }
+.btn-toggle-revelacao {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--mostarda);
+  color: var(--verde-quadro-escuro);
+}
+.btn-toggle-revelacao.liberado {
+  background: var(--vermelho);
+  color: var(--papel);
+}

@@ -20,6 +20,10 @@ const btnAdminLogin = document.getElementById("btnAdminLogin");
 const btnResetPlacar = document.getElementById("btnResetPlacar");
 const btnExportarPDF = document.getElementById("btnExportarPDF");
 const adminMsg = document.getElementById("adminMsg");
+const conteudoRevelacaoAdmin = document.getElementById(
+  "conteudoRevelacaoAdmin",
+);
+const btnToggleRevelacao = document.getElementById("btnToggleRevelacao");
 
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
@@ -53,7 +57,88 @@ async function carregar() {
     `;
     return;
   }
+  async function carregarVotosRevelacao() {
+    const { data, error } = await supabase
+      .from("ranking_revelacao")
+      .select("*")
+      .order("total_votos", { ascending: false });
 
+    if (error) {
+      conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Erro ao carregar: ${error.message}</div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Nenhum voto registrado ainda 🌟</div>`;
+      return;
+    }
+
+    const totalVotos = data.reduce(
+      (acc, r) => acc + Number(r.total_votos || 0),
+      0,
+    );
+
+    conteudoRevelacaoAdmin.innerHTML = `
+    <p class="legenda-pontuacao">${totalVotos} votos registrados no total</p>
+    <div class="ranking">
+      ${data
+        .map(
+          (r, i) => `
+        <div class="item ${i === 0 ? "primeiro" : ""}">
+          <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
+          <div class="info">
+            <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
+            <div class="meta">${r.total_votos} votos</div>
+          </div>
+          <div class="media-geral">${r.total_votos}</div>
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  `;
+  }
+
+  async function atualizarBotaoRevelacao() {
+    const { data, error } = await supabase
+      .from("revelacao_estado")
+      .select("liberado")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    const liberado = data?.liberado || false;
+    btnToggleRevelacao.textContent = liberado
+      ? "Ocultar resultado (voltar ao suspense)"
+      : "Liberar resultado pro público";
+    btnToggleRevelacao.dataset.liberado = liberado ? "1" : "0";
+    btnToggleRevelacao.classList.toggle("liberado", liberado);
+  }
+
+  btnToggleRevelacao.addEventListener("click", async () => {
+    const liberadoAtual = btnToggleRevelacao.dataset.liberado === "1";
+    btnToggleRevelacao.disabled = true;
+
+    const { error } = await supabase
+      .from("revelacao_estado")
+      .update({ liberado: !liberadoAtual })
+      .eq("id", 1);
+
+    btnToggleRevelacao.disabled = false;
+
+    if (error) {
+      console.error(error);
+      adminMsg.textContent =
+        "Erro ao mudar o estado do Revelação: " + error.message;
+      return;
+    }
+
+    await atualizarBotaoRevelacao();
+  });
   const ranking = data
     .map(
       (r, i) => `
@@ -247,7 +332,12 @@ async function verificarAdmin() {
     areaAdmin.style.display = "block";
     if (!intervaloAtualizacao) {
       carregar();
-      intervaloAtualizacao = setInterval(carregar, 15000);
+      carregarVotosRevelacao();
+      atualizarBotaoRevelacao();
+      intervaloAtualizacao = setInterval(() => {
+        carregar();
+        carregarVotosRevelacao();
+      }, 15000);
     }
   } else {
     areaLogin.style.display = "block";
