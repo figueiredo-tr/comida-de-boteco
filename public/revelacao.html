@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1"
+    />
+    <title>Boteco Revelação — Vote no seu favorito</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/estilo-comanda.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌟</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="cabecalho">
+        <span class="selo">ARRAIÁ / NOITE DO BOTECO</span>
+        <h1>Boteco<br />Revelação</h1>
+        <p class="subt">Vote no boteco que mais te surpreendeu na noite</p>
+      </div>
+
+      <div class="tela-carregando" id="telaCarregando" style="display: none">
+        <p class="subt carregando-texto">carregando...</p>
+        <button
+          type="button"
+          class="entrar-google"
+          id="btnTentarNovamente"
+          style="display: none"
+        >
+          Tentar novamente
+        </button>
+      </div>
+
+      <div class="tela-login" id="telaLogin" style="display: none">
+        <p class="subt">Entre com sua conta Google pra poder votar.</p>
+        <button type="button" class="entrar-google" id="btnEntrarGoogle">
+          Entrar com Google
+        </button>
+      </div>
+
+      <form id="formRevelacao" class="comanda" style="display: none">
+        <div class="comanda-num">VOTO Nº <span id="numVoto">0000</span></div>
+        <p class="revelacao-instrucao">Escolha 1 boteco:</p>
+        <div class="revelacao-opcoes" id="revelacaoOpcoes"></div>
+        <button type="submit" class="enviar" disabled>Confirmar voto</button>
+        <p class="erro" id="msgErro">Escolhe um boteco antes de confirmar 🙂</p>
+      </form>
+
+      <div class="tela-obrigado" id="telaObrigado" style="display: none">
+        <div class="carimbo">Votado ✓</div>
+        <h1 style="font-size: 22px">Voto registrado!</h1>
+        <p class="subt">Valeu por escolher o boteco revelação da noite.</p>
+        <a href="dashboard.html" class="btn-voltar">Ver placar geral</a>
+      </div>
+
+      <div class="tela-ja-avaliado" id="telaJaVotado" style="display: none">
+        <div class="carimbo">Já votado ✓</div>
+        <h1 style="font-size: 22px">Você já votou no revelação!</h1>
+        <p class="subt">Cada pessoa vota só uma vez nessa categoria.</p>
+        <a href="dashboard.html" class="btn-voltar">Ver placar geral</a>
+      </div>
+
+      <p class="rodape">feito com carinho pro arraiá 🌽</p>
+    </div>
+
+    <script type="module" src="assets/revelacao.js"></script>
+  </body>
+</html>
