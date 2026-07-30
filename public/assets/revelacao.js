@@ -23,17 +23,22 @@ let iniciando = false;
 
 // Monta os cartões de escolha a partir do RESTAURANTES (config.js)
 opcoesContainer.innerHTML = Object.entries(RESTAURANTES)
-  .map(
-    ([id, r]) => `
+  .map(([id, r]) => {
+    // Os caminhos de logo no config.js são relativos às páginas dentro
+    // de subpastas (formularios/, jurados/); aqui na raiz, tiramos o "../"
+    const logoSrc = (r.logo || "").replace("../assets/", "assets/");
+    return `
     <button type="button" class="opcao-revelacao" data-id="${id}">
-      <span class="opcao-numero">${id}</span>
+      <span class="opcao-logo">
+        ${logoSrc ? `<img src="${logoSrc}" alt="${r.nome}">` : ""}
+      </span>
       <span class="opcao-texto">
         <strong>${r.nome}</strong>
         ${r.prato ? `<span>${r.prato}</span>` : ""}
       </span>
     </button>
-  `,
-  )
+  `;
+  })
   .join("");
 
 opcoesContainer.querySelectorAll(".opcao-revelacao").forEach((botao) => {

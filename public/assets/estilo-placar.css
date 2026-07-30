@@ -597,11 +597,11 @@ body {
   align-items: center;
   text-align: center;
   text-decoration: none;
-  margin: 4px auto 28px;
-  max-width: 420px;
-  padding: 26px 24px 24px;
+  margin: 4px auto 24px;
+  max-width: 340px;
+  padding: 18px 20px 16px;
   border: 1px solid rgba(232, 169, 59, 0.45);
-  border-radius: 16px;
+  border-radius: 14px;
   background:
     radial-gradient(
       circle at 50% 0%,
@@ -620,13 +620,13 @@ body {
 .revelacao-cta-selo {
   display: inline-block;
   font-family: "JetBrains Mono", monospace;
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   background: var(--vermelho);
   color: var(--papel);
-  padding: 4px 12px;
+  padding: 7px 20px;
   border-radius: 999px;
   margin-bottom: 12px;
   animation: pulso-selo 2s infinite;
@@ -642,21 +642,17 @@ body {
     box-shadow: 0 0 0 0 rgba(193, 67, 46, 0);
   }
 }
-.revelacao-cta-icone {
-  font-size: 36px;
-  margin-bottom: 6px;
-}
 .revelacao-cta-titulo {
   font-family: "Anton", sans-serif;
   font-weight: 400;
   text-transform: uppercase;
-  font-size: 24px;
+  font-size: 22px;
   color: var(--mostarda);
   margin-bottom: 6px;
 }
 .revelacao-cta-texto {
-  font-size: 13px;
+  font-size: 12.5px;
   color: rgba(243, 236, 216, 0.6);
-  max-width: 300px;
+  max-width: 280px;
   line-height: 1.4;
 }

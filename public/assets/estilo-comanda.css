@@ -480,22 +480,27 @@ button.enviar:disabled {
   border-color: var(--vermelho);
   background: rgba(193, 67, 46, 0.08);
 }
-.opcao-numero {
+.opcao-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--vermelho);
-  color: var(--papel);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
-  font-weight: 700;
+  border: 2px dashed var(--madeira);
+  padding: 2px;
   flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.25);
 }
-.opcao-revelacao.selecionada .opcao-numero {
-  background: var(--mostarda);
+.opcao-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.opcao-revelacao.selecionada .opcao-logo {
+  border-color: var(--vermelho);
 }
 .opcao-texto {
   display: flex;
