@@ -439,3 +439,75 @@ button.enviar:disabled {
   color: var(--tinta);
   margin: 4px 0 8px;
 }
+.revelacao-instrucao {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--tinta);
+  margin: 0 0 14px;
+}
+
+.revelacao-opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.opcao-revelacao {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 2px solid rgba(107, 66, 38, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  font-family: "Nunito Sans", sans-serif;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.08s ease;
+}
+.opcao-revelacao:active {
+  transform: scale(0.99);
+}
+.opcao-revelacao.selecionada {
+  border-color: var(--vermelho);
+  background: rgba(193, 67, 46, 0.08);
+}
+.opcao-numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--vermelho);
+  color: var(--papel);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.opcao-revelacao.selecionada .opcao-numero {
+  background: var(--mostarda);
+}
+.opcao-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.opcao-texto strong {
+  font-size: 15px;
+  color: var(--tinta);
+}
+.opcao-texto span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px;
+  color: var(--madeira);
+}
