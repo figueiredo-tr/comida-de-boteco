@@ -2,60 +2,26 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, RESTAURANTES } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const CHAVE_LOCALSTORAGE = "revelacao_ja_votou";
 
 document.getElementById("numVoto").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
 const telaCarregando = document.getElementById("telaCarregando");
-const telaLogin = document.getElementById("telaLogin");
 const form = document.getElementById("formRevelacao");
 const telaObrigado = document.getElementById("telaObrigado");
 const telaJaVotado = document.getElementById("telaJaVotado");
-const btnEntrarGoogle = document.getElementById("btnEntrarGoogle");
-const btnTentarNovamente = document.getElementById("btnTentarNovamente");
+const telaEncerrada = document.getElementById("telaEncerrada");
 const msgErro = document.getElementById("msgErro");
 const opcoesContainer = document.getElementById("revelacaoOpcoes");
 const botaoEnviar = form.querySelector(".enviar");
 
 let restauranteEscolhido = null;
-let iniciando = false;
-const telaEncerrada = document.createElement("div");
-telaEncerrada.className = "tela-obrigado";
-telaEncerrada.style.display = "none";
-telaEncerrada.innerHTML = `
-  <div class="carimbo" style="border-color:var(--madeira); color:var(--madeira);">Encerrado</div>
-  <h1 style="font-size:22px;">Votações encerradas</h1>
-  <p class="subt">O organizador encerrou as votações. Obrigado por participar do festival!</p>
-`;
-form.after(telaEncerrada);
 
-async function votacaoEstaAberta() {
-  try {
-    const { data, error } = await comTimeout(
-      supabase
-        .from("votacao_estado")
-        .select("aberto")
-        .eq("id", 1)
-        .maybeSingle(),
-      6000,
-    );
-    if (error) {
-      console.error(error);
-      return true;
-    }
-    return data?.aberto ?? true;
-  } catch (err) {
-    console.error("Erro ao checar estado da votacao:", err);
-    return true;
-  }
-}
-
-// Monta os cartões de escolha a partir do RESTAURANTES (config.js)
+// Monta os cartões de escolha, com logo de cada restaurante
 opcoesContainer.innerHTML = Object.entries(RESTAURANTES)
   .map(([id, r]) => {
-    // Os caminhos de logo no config.js são relativos às páginas dentro
-    // de subpastas (formularios/, jurados/); aqui na raiz, tiramos o "../"
     const logoSrc = (r.logo || "").replace("../assets/", "assets/");
     return `
     <button type="button" class="opcao-revelacao" data-id="${id}">
@@ -83,16 +49,11 @@ opcoesContainer.querySelectorAll(".opcao-revelacao").forEach((botao) => {
 });
 
 function mostrarTela(tela) {
-  [
-    telaCarregando,
-    telaLogin,
-    form,
-    telaObrigado,
-    telaJaVotado,
-    telaEncerrada,
-  ].forEach((el) => {
-    if (el) el.style.display = "none";
-  });
+  [telaCarregando, form, telaObrigado, telaJaVotado, telaEncerrada].forEach(
+    (el) => {
+      if (el) el.style.display = "none";
+    },
+  );
   if (tela) tela.style.display = "block";
 }
 
@@ -105,89 +66,58 @@ function comTimeout(promessa, ms) {
   ]);
 }
 
-btnEntrarGoogle.addEventListener("click", async () => {
-  btnEntrarGoogle.disabled = true;
-  btnEntrarGoogle.textContent = "Redirecionando...";
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: window.location.href },
-  });
-});
-
-btnTentarNovamente.addEventListener("click", () => {
-  iniciando = false;
-  iniciar();
-});
-
-async function jaVotou(userId) {
-  const { data, error } = await comTimeout(
-    supabase
-      .from("votos_revelacao")
-      .select("id")
-      .eq("user_id", userId)
-      .maybeSingle(),
-    6000,
-  );
-  if (error) {
-    console.error(error);
-    return false;
+async function votacaoEstaAberta() {
+  try {
+    const { data, error } = await comTimeout(
+      supabase
+        .from("votacao_estado")
+        .select("aberto")
+        .eq("id", 1)
+        .maybeSingle(),
+      6000,
+    );
+    if (error) {
+      console.error(error);
+      return true;
+    }
+    return data?.aberto ?? true;
+  } catch (err) {
+    console.error("Erro ao checar estado da votacao:", err);
+    return true;
   }
-  return !!data;
 }
 
 async function iniciar() {
-  if (iniciando) return;
-  iniciando = true;
-
   mostrarTela(telaCarregando);
-  const textoCarregando = telaCarregando.querySelector(".carregando-texto");
-  textoCarregando.textContent = "carregando...";
-  btnTentarNovamente.style.display = "none";
 
-  try {
-    const aberta = await votacaoEstaAberta();
-    if (!aberta) {
-      mostrarTela(telaEncerrada);
-      return;
-    }
-
-    const {
-      data: { session },
-    } = await comTimeout(supabase.auth.getSession(), 6000);
-
-    if (!session) {
-      mostrarTela(telaLogin);
-      return;
-    }
-
-    const votou = await jaVotou(session.user.id);
-
-    if (votou) {
-      mostrarTela(telaJaVotado);
-      return;
-    }
-
-    mostrarTela(form);
-  } catch (err) {
-    console.error("Erro ao iniciar:", err);
-    mostrarTela(telaCarregando);
-    textoCarregando.textContent =
-      "Demorou demais pra carregar. Toca no botão abaixo pra tentar de novo.";
-    btnTentarNovamente.style.display = "inline-block";
-  } finally {
-    iniciando = false;
+  const aberta = await votacaoEstaAberta();
+  if (!aberta) {
+    mostrarTela(telaEncerrada);
+    return;
   }
+
+  if (localStorage.getItem(CHAVE_LOCALSTORAGE)) {
+    mostrarTela(telaJaVotado);
+    return;
+  }
+
+  mostrarTela(form);
 }
 
 iniciar();
-supabase.auth.onAuthStateChange(() => iniciar());
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
+
   const aberta = await votacaoEstaAberta();
   if (!aberta) {
     mostrarTela(telaEncerrada);
+    return;
+  }
+
+  if (localStorage.getItem(CHAVE_LOCALSTORAGE)) {
+    mostrarTela(telaJaVotado);
     return;
   }
 
@@ -197,41 +127,23 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  let session;
-  try {
-    const resultado = await comTimeout(supabase.auth.getSession(), 6000);
-    session = resultado.data.session;
-  } catch (err) {
-    msgErro.textContent = "Deu ruim ao verificar seu login. Tenta de novo?";
-    msgErro.style.display = "block";
-    return;
-  }
-
-  if (!session) {
-    mostrarTela(telaLogin);
-    return;
-  }
-
   botaoEnviar.disabled = true;
   botaoEnviar.textContent = "Enviando...";
 
   const { error } = await supabase.from("votos_revelacao").insert({
     restaurante_id: restauranteEscolhido,
     restaurante_nome: RESTAURANTES[restauranteEscolhido].nome,
-    user_id: session.user.id,
   });
 
   if (error) {
     console.error(error);
     botaoEnviar.disabled = false;
     botaoEnviar.textContent = "Confirmar voto";
-    msgErro.textContent =
-      error.code === "23505"
-        ? "Você já votou no revelação."
-        : "Deu ruim ao enviar. Tenta de novo?";
+    msgErro.textContent = "Deu ruim ao enviar. Tenta de novo?";
     msgErro.style.display = "block";
     return;
   }
 
+  localStorage.setItem(CHAVE_LOCALSTORAGE, restauranteEscolhido);
   mostrarTela(telaObrigado);
 });

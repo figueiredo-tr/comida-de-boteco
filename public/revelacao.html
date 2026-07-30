@@ -28,21 +28,6 @@
 
       <div class="tela-carregando" id="telaCarregando" style="display: none">
         <p class="subt carregando-texto">carregando...</p>
-        <button
-          type="button"
-          class="entrar-google"
-          id="btnTentarNovamente"
-          style="display: none"
-        >
-          Tentar novamente
-        </button>
-      </div>
-
-      <div class="tela-login" id="telaLogin" style="display: none">
-        <p class="subt">Entre com sua conta Google pra poder votar.</p>
-        <button type="button" class="entrar-google" id="btnEntrarGoogle">
-          Entrar com Google
-        </button>
       </div>
 
       <form id="formRevelacao" class="comanda" style="display: none">
@@ -57,18 +42,35 @@
         <div class="carimbo">Votado ✓</div>
         <h1 style="font-size: 22px">Voto registrado!</h1>
         <p class="subt">Valeu por escolher o boteco revelação da noite.</p>
-        <a href="resultado-revelacao.html" class="btn-voltar">Ver Resultado</a>
+        <a href="resultado-revelacao.html" class="btn-voltar"
+          >Ver resultado do Revelação</a
+        >
       </div>
 
       <div class="tela-ja-avaliado" id="telaJaVotado" style="display: none">
         <div class="carimbo">Já votado ✓</div>
         <h1 style="font-size: 22px">Você já votou no revelação!</h1>
-        <p class="subt">Cada pessoa vota só uma vez nessa categoria.</p>
+        <p class="subt">
+          Cada pessoa vota só uma vez nessa categoria, nesse aparelho.
+        </p>
         <a href="resultado-revelacao.html" class="btn-voltar"
           >Ver resultado do Revelação</a
         >
       </div>
-      <p class="rodape">🌽</p>
+
+      <div class="tela-obrigado" id="telaEncerrada" style="display: none">
+        <div
+          class="carimbo"
+          style="border-color: var(--madeira); color: var(--madeira)"
+        >
+          Encerrado
+        </div>
+        <h1 style="font-size: 22px">Votações encerradas</h1>
+        <p class="subt">
+          O organizador encerrou a votação do Boteco Revelação. Obrigado por
+          participar!
+        </p>
+      </div>
     </div>
 
     <script type="module" src="assets/revelacao.js"></script>
