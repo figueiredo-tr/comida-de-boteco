@@ -57,88 +57,7 @@ async function carregar() {
     `;
     return;
   }
-  async function carregarVotosRevelacao() {
-    const { data, error } = await supabase
-      .from("ranking_revelacao")
-      .select("*")
-      .order("total_votos", { ascending: false });
 
-    if (error) {
-      conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Erro ao carregar: ${error.message}</div>`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Nenhum voto registrado ainda 🌟</div>`;
-      return;
-    }
-
-    const totalVotos = data.reduce(
-      (acc, r) => acc + Number(r.total_votos || 0),
-      0,
-    );
-
-    conteudoRevelacaoAdmin.innerHTML = `
-    <p class="legenda-pontuacao">${totalVotos} votos registrados no total</p>
-    <div class="ranking">
-      ${data
-        .map(
-          (r, i) => `
-        <div class="item ${i === 0 ? "primeiro" : ""}">
-          <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
-          <div class="info">
-            <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
-            <div class="meta">${r.total_votos} votos</div>
-          </div>
-          <div class="media-geral">${r.total_votos}</div>
-        </div>
-      `,
-        )
-        .join("")}
-    </div>
-  `;
-  }
-
-  async function atualizarBotaoRevelacao() {
-    const { data, error } = await supabase
-      .from("revelacao_estado")
-      .select("liberado")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const liberado = data?.liberado || false;
-    btnToggleRevelacao.textContent = liberado
-      ? "Ocultar resultado (voltar ao suspense)"
-      : "Liberar resultado pro público";
-    btnToggleRevelacao.dataset.liberado = liberado ? "1" : "0";
-    btnToggleRevelacao.classList.toggle("liberado", liberado);
-  }
-
-  btnToggleRevelacao.addEventListener("click", async () => {
-    const liberadoAtual = btnToggleRevelacao.dataset.liberado === "1";
-    btnToggleRevelacao.disabled = true;
-
-    const { error } = await supabase
-      .from("revelacao_estado")
-      .update({ liberado: !liberadoAtual })
-      .eq("id", 1);
-
-    btnToggleRevelacao.disabled = false;
-
-    if (error) {
-      console.error(error);
-      adminMsg.textContent =
-        "Erro ao mudar o estado do Revelação: " + error.message;
-      return;
-    }
-
-    await atualizarBotaoRevelacao();
-  });
   const ranking = data
     .map(
       (r, i) => `
@@ -189,6 +108,90 @@ async function carregar() {
   atualizacao.textContent =
     "atualizado às " + new Date().toLocaleTimeString("pt-BR");
 }
+
+// ===== Boteco Revelação (separado do carregar() acima) =====
+async function carregarVotosRevelacao() {
+  const { data, error } = await supabase
+    .from("ranking_revelacao")
+    .select("*")
+    .order("total_votos", { ascending: false });
+
+  if (error) {
+    conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Erro ao carregar: ${error.message}</div>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    conteudoRevelacaoAdmin.innerHTML = `<div class="pombinha">Nenhum voto registrado ainda 🌟</div>`;
+    return;
+  }
+
+  const totalVotos = data.reduce(
+    (acc, r) => acc + Number(r.total_votos || 0),
+    0,
+  );
+
+  conteudoRevelacaoAdmin.innerHTML = `
+    <p class="legenda-pontuacao">${totalVotos} votos registrados no total</p>
+    <div class="ranking">
+      ${data
+        .map(
+          (r, i) => `
+        <div class="item ${i === 0 ? "primeiro" : ""}">
+          <div class="posicao">${MEDALHAS[i] || i + 1 + "º"}</div>
+          <div class="info">
+            <div class="nome">${r.restaurante_nome}${i === 0 ? '<span class="chip-lider">líder</span>' : ""}</div>
+            <div class="meta">${r.total_votos} votos</div>
+          </div>
+          <div class="media-geral">${r.total_votos}</div>
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+async function atualizarBotaoRevelacao() {
+  const { data, error } = await supabase
+    .from("revelacao_estado")
+    .select("liberado")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const liberado = data?.liberado || false;
+  btnToggleRevelacao.textContent = liberado
+    ? "Ocultar resultado (voltar ao suspense)"
+    : "Liberar resultado pro público";
+  btnToggleRevelacao.dataset.liberado = liberado ? "1" : "0";
+  btnToggleRevelacao.classList.toggle("liberado", liberado);
+}
+
+btnToggleRevelacao.addEventListener("click", async () => {
+  const liberadoAtual = btnToggleRevelacao.dataset.liberado === "1";
+  btnToggleRevelacao.disabled = true;
+
+  const { error } = await supabase
+    .from("revelacao_estado")
+    .update({ liberado: !liberadoAtual })
+    .eq("id", 1);
+
+  btnToggleRevelacao.disabled = false;
+
+  if (error) {
+    console.error(error);
+    adminMsg.textContent =
+      "Erro ao mudar o estado do Revelação: " + error.message;
+    return;
+  }
+
+  await atualizarBotaoRevelacao();
+});
 
 btnAdminLogin.addEventListener("click", async () => {
   btnAdminLogin.disabled = true;
@@ -257,10 +260,6 @@ btnExportarPDF.addEventListener("click", () => {
 
   const relatorioEl = document.getElementById("relatorio");
 
-  // Cabeçalho profissional (nome do evento + título do relatório),
-  // inserido de verdade dentro do relatório (não fora da tela — o
-  // html2canvas falha em capturar elementos posicionados fora da
-  // viewport) e removido logo depois de gerar o PDF.
   const cabecalho = document.createElement("div");
   cabecalho.className = "pdf-cabecalho";
   cabecalho.innerHTML = `
@@ -273,17 +272,9 @@ btnExportarPDF.addEventListener("click", () => {
   relatorioEl.insertBefore(cabecalho, relatorioEl.firstChild);
   relatorioEl.classList.add("pdf-wrapper");
 
-  // Largura fixa de verdade no elemento (não "windowWidth" simulado,
-  // que bagunça o cálculo de escala do html2pdf) — garante o mesmo
-  // resultado não importa o tamanho da tela de quem exportou.
   const larguraOriginal = relatorioEl.style.width;
   relatorioEl.style.width = "700px";
 
-  // Reforça "não quebrar no meio" via estilo INLINE em cada card. O
-  // html2pdf.js decide isso lendo o CSS computado do elemento, mas o
-  // processo de clonagem dele (pra capturar) tem bug conhecido pra
-  // carregar folha de estilo externa direito — estilo inline garante
-  // que a regra sobrevive à clonagem de qualquer forma.
   const elementosSemQuebra = relatorioEl.querySelectorAll(".item, .painel");
   elementosSemQuebra.forEach((el) => {
     el.style.pageBreakInside = "avoid";
