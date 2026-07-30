@@ -44,9 +44,6 @@ if (restaurante.foto) {
   cabecalho.after(polaroid);
 }
 
-// Monta um grid de botões 0-5 por categoria (visual igual ao do público).
-// O valor é gravado direto, sem meia-nota, pra bater certinho com o banco
-// (check nota <= 5) e com a fórmula de pontuação (máx 50).
 const categoriasContainer = document.querySelector(".categorias-container");
 CRITERIOS.forEach((crit) => {
   const div = document.createElement("div");
@@ -69,14 +66,29 @@ const btnEntrarGoogle = document.getElementById("btnEntrarGoogle");
 const btnTentarNovamente = document.getElementById("btnTentarNovamente");
 const msgErro = document.getElementById("msgErro");
 
+const telaEncerrada = document.createElement("div");
+telaEncerrada.className = "tela-obrigado";
+telaEncerrada.style.display = "none";
+telaEncerrada.innerHTML = `
+  <div class="carimbo" style="border-color:var(--madeira); color:var(--madeira);">Encerrado</div>
+  <h1 style="font-size:22px;">Votações encerradas</h1>
+  <p class="subt">O organizador encerrou as avaliações. Obrigado por participar do festival!</p>
+`;
+form.after(telaEncerrada);
+
 let iniciando = false;
 
 function mostrarTela(tela) {
-  [telaCarregando, telaLogin, form, telaObrigado, telaJaAvaliado].forEach(
-    (el) => {
-      if (el) el.style.display = "none";
-    },
-  );
+  [
+    telaCarregando,
+    telaLogin,
+    form,
+    telaObrigado,
+    telaJaAvaliado,
+    telaEncerrada,
+  ].forEach((el) => {
+    if (el) el.style.display = "none";
+  });
   if (tela) tela.style.display = "block";
 }
 
@@ -87,6 +99,27 @@ function comTimeout(promessa, ms) {
       setTimeout(() => reject(new Error("timeout")), ms),
     ),
   ]);
+}
+
+async function votacaoEstaAberta() {
+  try {
+    const { data, error } = await comTimeout(
+      supabase
+        .from("votacao_estado")
+        .select("aberto")
+        .eq("id", 1)
+        .maybeSingle(),
+      6000,
+    );
+    if (error) {
+      console.error(error);
+      return true;
+    }
+    return data?.aberto ?? true;
+  } catch (err) {
+    console.error("Erro ao checar estado da votacao:", err);
+    return true;
+  }
 }
 
 btnEntrarGoogle.addEventListener("click", async () => {
@@ -130,6 +163,12 @@ async function iniciar() {
   btnTentarNovamente.style.display = "none";
 
   try {
+    const aberta = await votacaoEstaAberta();
+    if (!aberta) {
+      mostrarTela(telaEncerrada);
+      return;
+    }
+
     const {
       data: { session },
     } = await comTimeout(supabase.auth.getSession(), 6000);
@@ -159,13 +198,12 @@ async function iniciar() {
   }
 }
 
-// Cria os botões 0-5 dentro de cada .nota-publica-grade (uma por categoria)
 function montarNotasCategorias() {
   document.querySelectorAll(".nota-publica-grade").forEach((grade) => {
     if (grade.dataset.montado === "1") return;
     grade.dataset.montado = "1";
 
-    const valorEl = grade.nextElementSibling; // .nota-publica-valor logo depois
+    const valorEl = grade.nextElementSibling;
 
     for (let n = 0; n <= 5; n++) {
       const botao = document.createElement("button");
@@ -194,6 +232,12 @@ supabase.auth.onAuthStateChange(() => iniciar());
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
+
+  const aberta = await votacaoEstaAberta();
+  if (!aberta) {
+    mostrarTela(telaEncerrada);
+    return;
+  }
 
   const campos = CRITERIOS.map((crit) => ({
     chave: crit.chave,

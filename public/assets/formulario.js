@@ -15,10 +15,8 @@ document.getElementById("numComanda").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
 );
 
-// Remove a linha "Você está avaliando: X" — o nome já vai aparecer embaixo da logo
 document.querySelector(".subt")?.remove();
 
-// Logo grande + nome do restaurante logo abaixo dela
 const cabecalho = document.querySelector(".cabecalho");
 if (restaurante.logo) {
   const carimbo = document.createElement("div");
@@ -41,7 +39,6 @@ if (restaurante.foto) {
   cabecalho.after(polaroid);
 }
 
-// Monta o seletor de nota única (0 a 10) dentro de .nota-publica-container
 const notaContainer = document.querySelector(".nota-publica-container");
 let notaEscolhida = null;
 
@@ -75,7 +72,6 @@ function montarNotaUnica() {
 
 montarNotaUnica();
 
-// ---- Elementos já existentes no HTML (nada de criar duplicado) ----
 const telaCarregando = document.getElementById("telaCarregando");
 const telaLogin = document.getElementById("telaLogin");
 const form = document.getElementById("formAvaliacao");
@@ -85,14 +81,31 @@ const btnEntrarGoogle = document.getElementById("btnEntrarGoogle");
 const btnTentarNovamente = document.getElementById("btnTentarNovamente");
 const msgErro = document.getElementById("msgErro");
 
+// Tela dinâmica de "votação encerrada" — criada uma única vez, sem
+// precisar editar o HTML de cada um dos restaurantes.
+const telaEncerrada = document.createElement("div");
+telaEncerrada.className = "tela-obrigado";
+telaEncerrada.style.display = "none";
+telaEncerrada.innerHTML = `
+  <div class="carimbo" style="border-color:var(--madeira); color:var(--madeira);">Encerrado</div>
+  <h1 style="font-size:22px;">Votações encerradas</h1>
+  <p class="subt">O organizador encerrou as avaliações. Obrigado por participar do festival!</p>
+`;
+form.after(telaEncerrada);
+
 let iniciando = false;
 
 function mostrarTela(tela) {
-  [telaCarregando, telaLogin, form, telaObrigado, telaJaAvaliado].forEach(
-    (el) => {
-      if (el) el.style.display = "none";
-    },
-  );
+  [
+    telaCarregando,
+    telaLogin,
+    form,
+    telaObrigado,
+    telaJaAvaliado,
+    telaEncerrada,
+  ].forEach((el) => {
+    if (el) el.style.display = "none";
+  });
   if (tela) tela.style.display = "block";
 }
 
@@ -103,6 +116,27 @@ function comTimeout(promessa, ms) {
       setTimeout(() => reject(new Error("timeout")), ms),
     ),
   ]);
+}
+
+async function votacaoEstaAberta() {
+  try {
+    const { data, error } = await comTimeout(
+      supabase
+        .from("votacao_estado")
+        .select("aberto")
+        .eq("id", 1)
+        .maybeSingle(),
+      6000,
+    );
+    if (error) {
+      console.error(error);
+      return true;
+    }
+    return data?.aberto ?? true;
+  } catch (err) {
+    console.error("Erro ao checar estado da votacao:", err);
+    return true;
+  }
 }
 
 btnEntrarGoogle.addEventListener("click", async () => {
@@ -119,7 +153,6 @@ btnTentarNovamente.addEventListener("click", () => {
   iniciar();
 });
 
-// Checa na tabela do PÚBLICO se esse usuário já avaliou esse restaurante
 async function verificarJaAvaliado(userId) {
   const { data, error } = await comTimeout(
     supabase
@@ -147,6 +180,12 @@ async function iniciar() {
   btnTentarNovamente.style.display = "none";
 
   try {
+    const aberta = await votacaoEstaAberta();
+    if (!aberta) {
+      mostrarTela(telaEncerrada);
+      return;
+    }
+
     const {
       data: { session },
     } = await comTimeout(supabase.auth.getSession(), 6000);
@@ -181,6 +220,12 @@ supabase.auth.onAuthStateChange(() => iniciar());
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
+
+  const aberta = await votacaoEstaAberta();
+  if (!aberta) {
+    mostrarTela(telaEncerrada);
+    return;
+  }
 
   if (notaEscolhida === null) {
     msgErro.textContent = "Dá uma nota de 0 a 10 antes de enviar 🙂";

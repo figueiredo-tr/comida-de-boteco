@@ -24,6 +24,7 @@ const conteudoRevelacaoAdmin = document.getElementById(
   "conteudoRevelacaoAdmin",
 );
 const btnToggleRevelacao = document.getElementById("btnToggleRevelacao");
+const btnToggleVotacao = document.getElementById("btnToggleVotacao");
 
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
@@ -108,6 +109,56 @@ async function carregar() {
   atualizacao.textContent =
     "atualizado às " + new Date().toLocaleTimeString("pt-BR");
 }
+async function atualizarBotaoVotacao() {
+  const { data, error } = await supabase
+    .from("votacao_estado")
+    .select("aberto")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const aberto = data?.aberto ?? true;
+  btnToggleVotacao.textContent = aberto
+    ? "Encerrar votações"
+    : "Reabrir votações";
+  btnToggleVotacao.dataset.aberto = aberto ? "1" : "0";
+  btnToggleVotacao.classList.toggle("encerrada", !aberto);
+}
+
+btnToggleVotacao.addEventListener("click", async () => {
+  const abertoAtual = btnToggleVotacao.dataset.aberto === "1";
+  const acao = abertoAtual ? "encerrar" : "reabrir";
+
+  const confirmar = confirm(
+    abertoAtual
+      ? "Tem certeza que quer ENCERRAR as votações? Ninguém mais vai conseguir avaliar ou votar (público, júri e Revelação) até você reabrir."
+      : "Quer REABRIR as votações? Todo mundo vai poder avaliar e votar de novo.",
+  );
+  if (!confirmar) return;
+
+  btnToggleVotacao.disabled = true;
+
+  const { error } = await supabase
+    .from("votacao_estado")
+    .update({ aberto: !abertoAtual })
+    .eq("id", 1);
+
+  btnToggleVotacao.disabled = false;
+
+  if (error) {
+    console.error(error);
+    adminMsg.textContent =
+      "Erro ao mudar o estado da votação: " + error.message;
+    return;
+  }
+
+  adminMsg.textContent = `Votações ${acao === "encerrar" ? "encerradas" : "reabertas"} com sucesso!`;
+  await atualizarBotaoVotacao();
+});
 
 // ===== Boteco Revelação (separado do carregar() acima) =====
 async function carregarVotosRevelacao() {
@@ -325,6 +376,7 @@ async function verificarAdmin() {
       carregar();
       carregarVotosRevelacao();
       atualizarBotaoRevelacao();
+      atualizarBotaoVotacao();
       intervaloAtualizacao = setInterval(() => {
         carregar();
         carregarVotosRevelacao();

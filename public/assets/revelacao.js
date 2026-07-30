@@ -20,6 +20,36 @@ const botaoEnviar = form.querySelector(".enviar");
 
 let restauranteEscolhido = null;
 let iniciando = false;
+const telaEncerrada = document.createElement("div");
+telaEncerrada.className = "tela-obrigado";
+telaEncerrada.style.display = "none";
+telaEncerrada.innerHTML = `
+  <div class="carimbo" style="border-color:var(--madeira); color:var(--madeira);">Encerrado</div>
+  <h1 style="font-size:22px;">Votações encerradas</h1>
+  <p class="subt">O organizador encerrou as votações. Obrigado por participar do festival!</p>
+`;
+form.after(telaEncerrada);
+
+async function votacaoEstaAberta() {
+  try {
+    const { data, error } = await comTimeout(
+      supabase
+        .from("votacao_estado")
+        .select("aberto")
+        .eq("id", 1)
+        .maybeSingle(),
+      6000,
+    );
+    if (error) {
+      console.error(error);
+      return true;
+    }
+    return data?.aberto ?? true;
+  } catch (err) {
+    console.error("Erro ao checar estado da votacao:", err);
+    return true;
+  }
+}
 
 // Monta os cartões de escolha a partir do RESTAURANTES (config.js)
 opcoesContainer.innerHTML = Object.entries(RESTAURANTES)
@@ -53,11 +83,16 @@ opcoesContainer.querySelectorAll(".opcao-revelacao").forEach((botao) => {
 });
 
 function mostrarTela(tela) {
-  [telaCarregando, telaLogin, form, telaObrigado, telaJaVotado].forEach(
-    (el) => {
-      if (el) el.style.display = "none";
-    },
-  );
+  [
+    telaCarregando,
+    telaLogin,
+    form,
+    telaObrigado,
+    telaJaVotado,
+    telaEncerrada,
+  ].forEach((el) => {
+    if (el) el.style.display = "none";
+  });
   if (tela) tela.style.display = "block";
 }
 
@@ -110,6 +145,12 @@ async function iniciar() {
   btnTentarNovamente.style.display = "none";
 
   try {
+    const aberta = await votacaoEstaAberta();
+    if (!aberta) {
+      mostrarTela(telaEncerrada);
+      return;
+    }
+
     const {
       data: { session },
     } = await comTimeout(supabase.auth.getSession(), 6000);
@@ -144,6 +185,11 @@ supabase.auth.onAuthStateChange(() => iniciar());
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msgErro.style.display = "none";
+  const aberta = await votacaoEstaAberta();
+  if (!aberta) {
+    mostrarTela(telaEncerrada);
+    return;
+  }
 
   if (!restauranteEscolhido) {
     msgErro.textContent = "Escolhe um boteco antes de confirmar 🙂";
