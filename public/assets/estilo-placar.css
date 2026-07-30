@@ -681,3 +681,94 @@ body {
 .btn-toggle-votacao.encerrada {
   background: var(--verde-bandeira, #3d6b4f);
 }
+/* ===== Página de resultado do Boteco Revelação ===== */
+.suspense-card,
+.revelado-card {
+  text-align: center;
+  padding: 50px 20px;
+  border: 1px dashed rgba(232, 169, 59, 0.4);
+  border-radius: 14px;
+  background: rgba(243, 236, 216, 0.04);
+}
+.suspense-icone {
+  font-size: 52px;
+  display: inline-block;
+  animation: balanco 2.4s ease-in-out infinite;
+}
+@keyframes balanco {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+.suspense-titulo {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 22px;
+  color: var(--papel);
+  margin: 16px 0 8px;
+}
+.suspense-texto {
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 13.5px;
+  color: rgba(243, 236, 216, 0.55);
+  max-width: 340px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+.btn-revelar {
+  margin-top: 22px;
+  padding: 16px 30px;
+  border: none;
+  border-radius: 8px;
+  background: var(--vermelho);
+  color: var(--papel);
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #8f2f1e;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+.btn-revelar:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #8f2f1e;
+}
+.revelado-selo {
+  display: inline-block;
+  background: var(--mostarda);
+  color: var(--verde-quadro-escuro);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.revelado-nome {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: clamp(28px, 7vw, 44px);
+  line-height: 1.1;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #f7dfa0, var(--mostarda) 55%, #b9791f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 10px;
+}
+.revelado-votos {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  color: rgba(243, 236, 216, 0.55);
+}
