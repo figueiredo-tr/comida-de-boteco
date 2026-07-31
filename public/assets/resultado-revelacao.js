@@ -143,20 +143,6 @@ function renderVencedor(vencedor) {
   if (!vencedor) {
     conteudo.innerHTML = `<div class="pombinha">Nenhum voto registrado ainda 🍻</div>`;
     return;
-    function renderVencedor(vencedor) {
-      if (!vencedor) {
-        conteudo.innerHTML = `<div class="pombinha">Nenhum voto registrado ainda 🍻</div>`;
-        return;
-      }
-      conteudo.innerHTML = `
-    <div class="revelado-card">
-      <span class="revelado-selo">Boteco Revelação</span>
-      <div class="revelado-nome">${vencedor.restaurante_nome}</div>
-      <div class="revelado-votos">${vencedor.total_votos} votos do público</div>
-    </div>
-  `;
-      dispararFogos();
-    }
   }
   conteudo.innerHTML = `
     <div class="revelado-card">
@@ -165,8 +151,8 @@ function renderVencedor(vencedor) {
       <div class="revelado-votos">${vencedor.total_votos} votos do público</div>
     </div>
   `;
+  dispararFogos();
 }
-
 async function ciclo() {
   if (jaRevelado) return;
 
