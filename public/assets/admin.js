@@ -17,7 +17,6 @@ const atualizacao = document.getElementById("atualizacao");
 const areaLogin = document.getElementById("areaLogin");
 const areaAdmin = document.getElementById("areaAdmin");
 const btnAdminLogin = document.getElementById("btnAdminLogin");
-const btnResetPlacar = document.getElementById("btnResetPlacar");
 const btnExportarPDF = document.getElementById("btnExportarPDF");
 const adminMsg = document.getElementById("adminMsg");
 const conteudoRevelacaoAdmin = document.getElementById(
@@ -113,6 +112,7 @@ async function carregar() {
   atualizacao.textContent =
     "atualizado às " + new Date().toLocaleTimeString("pt-BR");
 }
+
 // Função genérica pra criar o toggle de cada área (público, júri, revelação),
 // evitando repetir a mesma lógica 3 vezes com nomes diferentes.
 function criarToggleVotacao({ botao, coluna, rotulo }) {
@@ -277,44 +277,6 @@ btnAdminLogin.addEventListener("click", async () => {
     provider: "google",
     options: { redirectTo: window.location.href },
   });
-});
-
-btnResetPlacar.addEventListener("click", async () => {
-  const confirmar = confirm(
-    "Tem certeza que quer apagar TODAS as avaliações (júri e público)? Essa ação não pode ser desfeita.",
-  );
-  if (!confirmar) return;
-
-  const confirmarDeNovo = confirm(
-    "Confirmando de novo: isso vai zerar o placar geral pra todos os restaurantes. Continuar?",
-  );
-  if (!confirmarDeNovo) return;
-
-  btnResetPlacar.disabled = true;
-  btnResetPlacar.textContent = "Resetando...";
-
-  const [{ error: erroJuri }, { error: erroPublico }] = await Promise.all([
-    supabase
-      .from("avaliacoes_juri")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000"),
-    supabase
-      .from("avaliacoes_publico")
-      .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000"),
-  ]);
-
-  btnResetPlacar.disabled = false;
-  btnResetPlacar.textContent = "Resetar placar";
-
-  if (erroJuri || erroPublico) {
-    adminMsg.textContent =
-      "Erro ao resetar: " + (erroJuri?.message || erroPublico?.message);
-    return;
-  }
-
-  adminMsg.textContent = "Placar resetado com sucesso!";
-  carregar();
 });
 
 btnExportarPDF.addEventListener("click", () => {
