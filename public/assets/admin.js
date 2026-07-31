@@ -24,7 +24,11 @@ const conteudoRevelacaoAdmin = document.getElementById(
   "conteudoRevelacaoAdmin",
 );
 const btnToggleRevelacao = document.getElementById("btnToggleRevelacao");
-const btnToggleVotacao = document.getElementById("btnToggleVotacao");
+const btnTogglePublico = document.getElementById("btnTogglePublico");
+const btnToggleJuri = document.getElementById("btnToggleJuri");
+const btnToggleRevelacaoVoto = document.getElementById(
+  "btnToggleRevelacaoVoto",
+);
 
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
@@ -109,55 +113,77 @@ async function carregar() {
   atualizacao.textContent =
     "atualizado às " + new Date().toLocaleTimeString("pt-BR");
 }
-async function atualizarBotaoVotacao() {
-  const { data, error } = await supabase
-    .from("votacao_estado")
-    .select("aberto")
-    .eq("id", 1)
-    .maybeSingle();
+// Função genérica pra criar o toggle de cada área (público, júri, revelação),
+// evitando repetir a mesma lógica 3 vezes com nomes diferentes.
+function criarToggleVotacao({ botao, coluna, rotulo }) {
+  async function atualizar() {
+    const { data, error } = await supabase
+      .from("votacao_estado")
+      .select(coluna)
+      .eq("id", 1)
+      .maybeSingle();
 
-  if (error) {
-    console.error(error);
-    return;
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    const aberto = data?.[coluna] ?? true;
+    botao.textContent = aberto
+      ? `Encerrar votação do ${rotulo}`
+      : `Reabrir votação do ${rotulo}`;
+    botao.dataset.aberto = aberto ? "1" : "0";
+    botao.classList.toggle("encerrada", !aberto);
   }
 
-  const aberto = data?.aberto ?? true;
-  btnToggleVotacao.textContent = aberto
-    ? "Encerrar votações"
-    : "Reabrir votações";
-  btnToggleVotacao.dataset.aberto = aberto ? "1" : "0";
-  btnToggleVotacao.classList.toggle("encerrada", !aberto);
+  botao.addEventListener("click", async () => {
+    const abertoAtual = botao.dataset.aberto === "1";
+    const acao = abertoAtual ? "encerrar" : "reabrir";
+
+    const confirmar = confirm(
+      abertoAtual
+        ? `Tem certeza que quer ENCERRAR a votação do ${rotulo}? Ninguém mais vai conseguir votar nessa parte até você reabrir.`
+        : `Quer REABRIR a votação do ${rotulo}?`,
+    );
+    if (!confirmar) return;
+
+    botao.disabled = true;
+
+    const { error } = await supabase
+      .from("votacao_estado")
+      .update({ [coluna]: !abertoAtual })
+      .eq("id", 1);
+
+    botao.disabled = false;
+
+    if (error) {
+      console.error(error);
+      adminMsg.textContent =
+        `Erro ao mudar o estado do ${rotulo}: ` + error.message;
+      return;
+    }
+
+    adminMsg.textContent = `Votação do ${rotulo} ${acao === "encerrar" ? "encerrada" : "reaberta"} com sucesso!`;
+    await atualizar();
+  });
+
+  return atualizar;
 }
 
-btnToggleVotacao.addEventListener("click", async () => {
-  const abertoAtual = btnToggleVotacao.dataset.aberto === "1";
-  const acao = abertoAtual ? "encerrar" : "reabrir";
-
-  const confirmar = confirm(
-    abertoAtual
-      ? "Tem certeza que quer ENCERRAR as votações? Ninguém mais vai conseguir avaliar ou votar (público, júri e Revelação) até você reabrir."
-      : "Quer REABRIR as votações? Todo mundo vai poder avaliar e votar de novo.",
-  );
-  if (!confirmar) return;
-
-  btnToggleVotacao.disabled = true;
-
-  const { error } = await supabase
-    .from("votacao_estado")
-    .update({ aberto: !abertoAtual })
-    .eq("id", 1);
-
-  btnToggleVotacao.disabled = false;
-
-  if (error) {
-    console.error(error);
-    adminMsg.textContent =
-      "Erro ao mudar o estado da votação: " + error.message;
-    return;
-  }
-
-  adminMsg.textContent = `Votações ${acao === "encerrar" ? "encerradas" : "reabertas"} com sucesso!`;
-  await atualizarBotaoVotacao();
+const atualizarBotaoPublico = criarToggleVotacao({
+  botao: btnTogglePublico,
+  coluna: "publico_aberto",
+  rotulo: "público",
+});
+const atualizarBotaoJuri = criarToggleVotacao({
+  botao: btnToggleJuri,
+  coluna: "juri_aberto",
+  rotulo: "júri",
+});
+const atualizarBotaoRevelacaoVoto = criarToggleVotacao({
+  botao: btnToggleRevelacaoVoto,
+  coluna: "revelacao_aberta",
+  rotulo: "Revelação",
 });
 
 // ===== Boteco Revelação (separado do carregar() acima) =====
@@ -376,7 +402,9 @@ async function verificarAdmin() {
       carregar();
       carregarVotosRevelacao();
       atualizarBotaoRevelacao();
-      atualizarBotaoVotacao();
+      atualizarBotaoPublico();
+      atualizarBotaoJuri();
+      atualizarBotaoRevelacaoVoto();
       intervaloAtualizacao = setInterval(() => {
         carregar();
         carregarVotosRevelacao();

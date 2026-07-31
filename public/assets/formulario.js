@@ -123,7 +123,7 @@ async function votacaoEstaAberta() {
     const { data, error } = await comTimeout(
       supabase
         .from("votacao_estado")
-        .select("aberto")
+        .select("publico_aberto")
         .eq("id", 1)
         .maybeSingle(),
       6000,
@@ -132,7 +132,7 @@ async function votacaoEstaAberta() {
       console.error(error);
       return true;
     }
-    return data?.aberto ?? true;
+    return data?.publico_aberto ?? true;
   } catch (err) {
     console.error("Erro ao checar estado da votacao:", err);
     return true;
