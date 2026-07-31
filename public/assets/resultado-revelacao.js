@@ -20,7 +20,7 @@ window.addEventListener("resize", redimensionarCanvas);
 const CORES_FOGOS = ["#e8a93b", "#c1432e", "#f3ecd8", "#3d6b4f", "#f7dfa0"];
 
 function criarExplosao(x, y) {
-  const qtdParticulas = 55;
+  const qtdParticulas = 80;
   for (let i = 0; i < qtdParticulas; i++) {
     const angulo = (Math.PI * 2 * i) / qtdParticulas;
     const velocidade = 2 + Math.random() * 3.5;
@@ -63,7 +63,7 @@ function passoAnimacao() {
 function dispararFogos() {
   animandoFogos = true;
   let explosoes = 0;
-  const maxExplosoes = 6;
+  const maxExplosoes = 10;
 
   const intervalo = setInterval(() => {
     const x = canvasFogos.width * (0.2 + Math.random() * 0.6);
@@ -75,7 +75,7 @@ function dispararFogos() {
       clearInterval(intervalo);
       animandoFogos = false;
     }
-  }, 350);
+  }, 250);
 
   requestAnimationFrame(passoAnimacao);
 }
