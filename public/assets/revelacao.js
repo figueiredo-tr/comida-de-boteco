@@ -2,7 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, RESTAURANTES } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const CHAVE_LOCALSTORAGE = "revelacao_ja_votou";
 
 document.getElementById("numVoto").textContent = String(
   Math.floor(1000 + Math.random() * 8999),
@@ -15,6 +14,7 @@ const telaJaVotado = document.getElementById("telaJaVotado");
 const telaEncerrada = document.getElementById("telaEncerrada");
 const msgErro = document.getElementById("msgErro");
 const opcoesContainer = document.getElementById("revelacaoOpcoes");
+const campoCpf = document.getElementById("cpfVoto");
 const botaoEnviar = form.querySelector(".enviar");
 
 let restauranteEscolhido = null;
@@ -47,6 +47,39 @@ opcoesContainer.querySelectorAll(".opcao-revelacao").forEach((botao) => {
     botaoEnviar.disabled = false;
   });
 });
+
+// Formata o CPF visualmente enquanto digita (000.000.000-00)
+campoCpf.addEventListener("input", () => {
+  let v = campoCpf.value.replace(/\D/g, "").slice(0, 11);
+  if (v.length > 9) {
+    v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+  } else if (v.length > 6) {
+    v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  } else if (v.length > 3) {
+    v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+  }
+  campoCpf.value = v;
+});
+
+// Validação matemática dos dígitos verificadores do CPF
+function cpfValido(cpfFormatado) {
+  const cpf = cpfFormatado.replace(/\D/g, "");
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i);
+  let resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== Number(cpf[9])) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) soma += Number(cpf[i]) * (11 - i);
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== Number(cpf[10])) return false;
+
+  return true;
+}
 
 function mostrarTela(tela) {
   [telaCarregando, form, telaObrigado, telaJaVotado, telaEncerrada].forEach(
@@ -96,11 +129,6 @@ async function iniciar() {
     return;
   }
 
-  if (localStorage.getItem(CHAVE_LOCALSTORAGE)) {
-    mostrarTela(telaJaVotado);
-    return;
-  }
-
   mostrarTela(form);
 }
 
@@ -116,13 +144,15 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (localStorage.getItem(CHAVE_LOCALSTORAGE)) {
-    mostrarTela(telaJaVotado);
+  if (!restauranteEscolhido) {
+    msgErro.textContent = "Escolhe um boteco antes de confirmar 🙂";
+    msgErro.style.display = "block";
     return;
   }
 
-  if (!restauranteEscolhido) {
-    msgErro.textContent = "Escolhe um boteco antes de confirmar 🙂";
+  const cpf = campoCpf.value.trim();
+  if (!cpfValido(cpf)) {
+    msgErro.textContent = "Digita um CPF válido pra confirmar seu voto.";
     msgErro.style.display = "block";
     return;
   }
@@ -133,17 +163,20 @@ form.addEventListener("submit", async (e) => {
   const { error } = await supabase.from("votos_revelacao").insert({
     restaurante_id: restauranteEscolhido,
     restaurante_nome: RESTAURANTES[restauranteEscolhido].nome,
+    cpf: cpf.replace(/\D/g, ""),
   });
 
   if (error) {
     console.error(error);
     botaoEnviar.disabled = false;
     botaoEnviar.textContent = "Confirmar voto";
-    msgErro.textContent = "Deu ruim ao enviar. Tenta de novo?";
+    msgErro.textContent =
+      error.code === "23505"
+        ? "Esse CPF já votou no Boteco Revelação."
+        : "Deu ruim ao enviar. Tenta de novo?";
     msgErro.style.display = "block";
     return;
   }
 
-  localStorage.setItem(CHAVE_LOCALSTORAGE, restauranteEscolhido);
   mostrarTela(telaObrigado);
 });

@@ -516,3 +516,18 @@ button.enviar:disabled {
   font-size: 11.5px;
   color: var(--madeira);
 }
+.campo input[type="text"] {
+  width: 100%;
+  border: none;
+  border-bottom: 2px dashed rgba(107, 66, 38, 0.4);
+  background: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 15px;
+  padding: 8px 2px;
+  color: var(--tinta);
+  letter-spacing: 0.5px;
+}
+.campo input[type="text"]:focus {
+  outline: none;
+  border-color: var(--vermelho);
+}

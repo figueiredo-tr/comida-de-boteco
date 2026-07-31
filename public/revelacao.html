@@ -34,6 +34,18 @@
         <div class="comanda-num">VOTO Nº <span id="numVoto">0000</span></div>
         <p class="revelacao-instrucao">Escolha 1 boteco:</p>
         <div class="revelacao-opcoes" id="revelacaoOpcoes"></div>
+
+        <div class="campo">
+          <label for="cpfVoto">Seu CPF (só pra evitar voto duplicado)</label>
+          <input
+            type="text"
+            id="cpfVoto"
+            inputmode="numeric"
+            placeholder="000.000.000-00"
+            maxlength="14"
+          />
+        </div>
+
         <button type="submit" class="enviar" disabled>Confirmar voto</button>
         <p class="erro" id="msgErro">Escolhe um boteco antes de confirmar 🙂</p>
       </form>
@@ -50,9 +62,7 @@
       <div class="tela-ja-avaliado" id="telaJaVotado" style="display: none">
         <div class="carimbo">Já votado ✓</div>
         <h1 style="font-size: 22px">Você já votou no revelação!</h1>
-        <p class="subt">
-          Cada pessoa vota só uma vez nessa categoria, nesse aparelho.
-        </p>
+        <p class="subt">Esse CPF já registrou um voto nessa categoria.</p>
         <a href="resultado-revelacao.html" class="btn-voltar"
           >Ver resultado do Revelação</a
         >
