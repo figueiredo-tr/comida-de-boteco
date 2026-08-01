@@ -7,16 +7,16 @@ import {
 } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const ADMIN_EMAILS = [
-  "andrefigueiredo.v@gmail.com",
-  "culturaeturismo@aguaboa.mg.gov.br",
-];
+// Senha única do admin — troque aqui se precisar alterar.
+const SENHA_ADMIN = "boteco2026";
+const CHAVE_SESSAO = "admin_autenticado";
 
 const conteudo = document.getElementById("conteudo");
 const atualizacao = document.getElementById("atualizacao");
 const areaLogin = document.getElementById("areaLogin");
 const areaAdmin = document.getElementById("areaAdmin");
-const btnAdminLogin = document.getElementById("btnAdminLogin");
+const formSenhaAdmin = document.getElementById("formSenhaAdmin");
+const campoSenhaAdmin = document.getElementById("campoSenhaAdmin");
 const btnExportarPDF = document.getElementById("btnExportarPDF");
 const adminMsg = document.getElementById("adminMsg");
 const conteudoRevelacaoAdmin = document.getElementById(
@@ -270,13 +270,16 @@ btnToggleRevelacao.addEventListener("click", async () => {
   await atualizarBotaoRevelacao();
 });
 
-btnAdminLogin.addEventListener("click", async () => {
-  btnAdminLogin.disabled = true;
-  btnAdminLogin.textContent = "Redirecionando...";
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: window.location.href },
-  });
+formSenhaAdmin.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (campoSenhaAdmin.value === SENHA_ADMIN) {
+    sessionStorage.setItem(CHAVE_SESSAO, "1");
+    adminMsg.textContent = "";
+    campoSenhaAdmin.value = "";
+    verificarAdmin();
+  } else {
+    adminMsg.textContent = "Senha incorreta.";
+  }
 });
 
 btnExportarPDF.addEventListener("click", () => {
@@ -350,14 +353,10 @@ btnExportarPDF.addEventListener("click", () => {
     });
 });
 
-async function verificarAdmin() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+function verificarAdmin() {
+  const autenticado = sessionStorage.getItem(CHAVE_SESSAO) === "1";
 
-  const ehAdmin = ADMIN_EMAILS.includes(session?.user?.email);
-
-  if (ehAdmin) {
+  if (autenticado) {
     areaLogin.style.display = "none";
     areaAdmin.style.display = "block";
     if (!intervaloAtualizacao) {
@@ -379,11 +378,7 @@ async function verificarAdmin() {
       clearInterval(intervaloAtualizacao);
       intervaloAtualizacao = null;
     }
-    adminMsg.textContent = session
-      ? "Essa conta não tem permissão de admin."
-      : "";
   }
 }
 
-supabase.auth.onAuthStateChange(() => verificarAdmin());
 verificarAdmin();
