@@ -110,6 +110,71 @@
         <p class="atualizacao" id="atualizacao"></p>
 
         <div class="secao-titulo" style="margin-top: 40px">
+          <h2>📝 Lançar cédulas de papel</h2>
+          <p class="subt">
+            Adiciona manualmente votos coletados fisicamente no evento
+          </p>
+        </div>
+
+        <form
+          id="formCedula"
+          style="
+            max-width: 360px;
+            margin: 0 auto 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <select
+            id="cedulaRestaurante"
+            required
+            style="
+              padding: 10px 12px;
+              border-radius: 8px;
+              border: 1px solid rgba(243, 236, 216, 0.25);
+              background: rgba(243, 236, 216, 0.05);
+              color: var(--papel);
+              font-family: &quot;Nunito Sans&quot;, sans-serif;
+            "
+          ></select>
+          <input
+            type="number"
+            id="cedulaNota"
+            min="0"
+            max="10"
+            step="1"
+            placeholder="Nota de 0 a 10"
+            required
+            style="
+              padding: 10px 12px;
+              border-radius: 8px;
+              border: 1px solid rgba(243, 236, 216, 0.25);
+              background: rgba(243, 236, 216, 0.05);
+              color: var(--papel);
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+            "
+          />
+          <input
+            type="text"
+            id="cedulaNome"
+            placeholder="Nome de quem votou (opcional)"
+            style="
+              padding: 10px 12px;
+              border-radius: 8px;
+              border: 1px solid rgba(243, 236, 216, 0.25);
+              background: rgba(243, 236, 216, 0.05);
+              color: var(--papel);
+              font-family: &quot;Nunito Sans&quot;, sans-serif;
+            "
+          />
+          <button type="submit" class="btn-exportar">Lançar cédula</button>
+          <p class="admin-msg" id="cedulaMsg"></p>
+        </form>
+
+        <div id="listaCedulas"></div>
+
+        <div class="secao-titulo" style="margin-top: 40px">
           <h2>🌟 Boteco Revelação</h2>
           <p class="subt">
             Votação do público — visível só pra você até liberar

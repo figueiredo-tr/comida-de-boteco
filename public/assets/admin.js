@@ -4,6 +4,7 @@ import {
   SUPABASE_ANON_KEY,
   EVENTO,
   CRITERIOS,
+  RESTAURANTES,
 } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -28,7 +29,10 @@ const btnToggleJuri = document.getElementById("btnToggleJuri");
 const btnToggleRevelacaoVoto = document.getElementById(
   "btnToggleRevelacaoVoto",
 );
-
+const cedulaRestauranteSelect = document.getElementById("cedulaRestaurante");
+const cedulaNotaInput = document.getElementById("cedulaNota");
+const cedulaNomeInput = document.getElementById("cedulaNome");
+const cedulaMsg = document.getElementById("cedulaMsg");
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
     <p class="hero-antetitulo">${EVENTO.antetitulo}</p>
@@ -185,7 +189,122 @@ const atualizarBotaoRevelacaoVoto = criarToggleVotacao({
   coluna: "revelacao_aberta",
   rotulo: "Revelação",
 });
+// Monta o <select> de restaurantes a partir do config.js
+cedulaRestauranteSelect.innerHTML = Object.entries(RESTAURANTES)
+  .map(([id, r]) => `<option value="${id}">${r.nome}</option>`)
+  .join("");
 
+formCedula.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  cedulaMsg.textContent = "";
+
+  const restauranteId = cedulaRestauranteSelect.value;
+  const nota = Number(cedulaNotaInput.value);
+
+  if (!Number.isInteger(nota) || nota < 0 || nota > 10) {
+    cedulaMsg.textContent = "A nota precisa ser um número inteiro de 0 a 10.";
+    return;
+  }
+
+  const botao = formCedula.querySelector("button[type='submit']");
+  botao.disabled = true;
+  botao.textContent = "Lançando...";
+
+  const nomeCedula = cedulaNomeInput.value.trim() || null;
+
+  const { error } = await supabase.from("avaliacoes_publico").insert({
+    restaurante_id: restauranteId,
+    restaurante_nome: RESTAURANTES[restauranteId].nome,
+    user_id: null,
+    nota,
+    origem: "cedula_papel",
+    nome_cedula: nomeCedula,
+  });
+
+  botao.disabled = false;
+  botao.textContent = "Lançar cédula";
+
+  if (error) {
+    console.error(error);
+    cedulaMsg.textContent = "Erro ao lançar: " + error.message;
+    return;
+  }
+
+  cedulaMsg.textContent = `Cédula lançada: ${RESTAURANTES[restauranteId].nome} — nota ${nota}${nomeCedula ? " (" + nomeCedula + ")" : ""}`;
+  cedulaNotaInput.value = "";
+  cedulaNomeInput.value = "";
+  cedulaNotaInput.focus();
+
+  carregar();
+  carregarUltimasCedulas();
+});
+
+async function carregarUltimasCedulas() {
+  const { data, error } = await supabase
+    .from("avaliacoes_publico")
+    .select("id, restaurante_nome, nota, nome_cedula, created_at")
+    .eq("origem", "cedula_papel")
+    .order("created_at", { ascending: false })
+    .limit(15);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    listaCedulas.innerHTML = `<p class="legenda-pontuacao">Nenhuma cédula lançada ainda</p>`;
+    return;
+  }
+
+  listaCedulas.innerHTML = `
+    <p class="legenda-pontuacao">Últimas cédulas lançadas (${data.length})</p>
+    <div class="ranking">
+      ${data
+        .map(
+          (c) => `
+        <div class="item">
+          <div class="info">
+            <div class="nome">${c.restaurante_nome}</div>
+            <div class="meta">${c.nome_cedula ? c.nome_cedula + " · " : ""}${new Date(c.created_at).toLocaleTimeString("pt-BR")}</div>
+          </div>
+          <div class="media-geral">${c.nota}</div>
+          <button
+            type="button"
+            class="btn-reset"
+            style="margin-left: 10px; padding: 6px 10px; font-size: 11px;"
+            onclick="window.removerCedula('${c.id}')"
+          >
+            Desfazer
+          </button>
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+// Exposta no window pra funcionar com o onclick inline acima
+window.removerCedula = async (id) => {
+  const confirmar = confirm("Remover essa cédula lançada por engano?");
+  if (!confirmar) return;
+
+  const { error } = await supabase
+    .from("avaliacoes_publico")
+    .delete()
+    .eq("id", id)
+    .eq("origem", "cedula_papel");
+
+  if (error) {
+    console.error(error);
+    alert("Erro ao remover: " + error.message);
+    return;
+  }
+
+  carregar();
+  carregarUltimasCedulas();
+};
 // ===== Boteco Revelação (separado do carregar() acima) =====
 async function carregarVotosRevelacao() {
   const { data, error } = await supabase
@@ -362,6 +481,8 @@ function verificarAdmin() {
     if (!intervaloAtualizacao) {
       carregar();
       carregarVotosRevelacao();
+      carregarCompletudeJuri();
+      carregarUltimasCedulas();
       atualizarBotaoRevelacao();
       atualizarBotaoPublico();
       atualizarBotaoJuri();
@@ -369,6 +490,7 @@ function verificarAdmin() {
       intervaloAtualizacao = setInterval(() => {
         carregar();
         carregarVotosRevelacao();
+        carregarCompletudeJuri();
       }, 15000);
     }
   } else {
