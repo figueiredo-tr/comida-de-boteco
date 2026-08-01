@@ -33,6 +33,8 @@ const cedulaRestauranteSelect = document.getElementById("cedulaRestaurante");
 const cedulaNotaInput = document.getElementById("cedulaNota");
 const cedulaNomeInput = document.getElementById("cedulaNome");
 const cedulaMsg = document.getElementById("cedulaMsg");
+const formCedula = document.getElementById("formCedula");
+const listaCedulas = document.getElementById("listaCedulas");
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
     <p class="hero-antetitulo">${EVENTO.antetitulo}</p>
