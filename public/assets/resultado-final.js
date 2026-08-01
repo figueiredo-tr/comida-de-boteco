@@ -12,6 +12,7 @@ let etapaAtual = 0; // 0 = nada revelado, 1 = 3º revelado, 2 = 2º revelado, 3 
 const canvasFogos = document.getElementById("fogosCanvas");
 const ctxFogos = canvasFogos.getContext("2d");
 let particulasFogos = [];
+let animandoFogos = false;
 
 function redimensionarCanvas() {
   canvasFogos.width = window.innerWidth;
@@ -58,13 +59,17 @@ function passoAnimacao() {
   particulasFogos = particulasFogos.filter((p) => p.vida > 0);
   ctxFogos.globalAlpha = 1;
 
-  if (particulasFogos.length > 0) {
+  // Continua o loop enquanto houver partícula viva OU enquanto ainda
+  // estivermos disparando novas explosões (evita que a animação pare
+  // antes da primeira explosão nascer, que era o bug original).
+  if (particulasFogos.length > 0 || animandoFogos) {
     requestAnimationFrame(passoAnimacao);
   }
 }
 
 // intensidade: 1 = leve (3º/2º lugar), 2 = grande (1º lugar, várias explosões)
 function dispararFogos(intensidade = 1) {
+  animandoFogos = true;
   const qtdExplosoes = intensidade > 1 ? 10 : 3;
   let feitas = 0;
 
@@ -73,7 +78,10 @@ function dispararFogos(intensidade = 1) {
     const y = canvasFogos.height * (0.15 + Math.random() * 0.4);
     criarExplosao(x, y, intensidade);
     feitas++;
-    if (feitas >= qtdExplosoes) clearInterval(intervalo);
+    if (feitas >= qtdExplosoes) {
+      clearInterval(intervalo);
+      animandoFogos = false;
+    }
   }, 280);
 
   requestAnimationFrame(passoAnimacao);
