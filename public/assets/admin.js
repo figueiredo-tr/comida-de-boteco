@@ -43,6 +43,26 @@ const cedulaNomeInput = document.getElementById("cedulaNome");
 const cedulaMsg = document.getElementById("cedulaMsg");
 const formCedula = document.getElementById("formCedula");
 const listaCedulas = document.getElementById("listaCedulas");
+let cedulasJaCarregadasUmaVez = false;
+
+btnVerCedulas.addEventListener("click", async () => {
+  const estaAberta = listaCedulas.style.display !== "none";
+
+  if (estaAberta) {
+    listaCedulas.style.display = "none";
+    btnVerCedulas.textContent = "Ver últimas cédulas lançadas";
+    return;
+  }
+
+  listaCedulas.style.display = "block";
+  btnVerCedulas.textContent = "Ocultar cédulas lançadas";
+
+  if (!cedulasJaCarregadasUmaVez) {
+    cedulasJaCarregadasUmaVez = true;
+    await carregarUltimasCedulas();
+  }
+});
+const btnVerCedulas = document.getElementById("btnVerCedulas");
 async function atualizarBotaoFinal() {
   const { data, error } = await supabase
     .from("final_estado")
@@ -542,7 +562,6 @@ function verificarAdmin() {
     if (!intervaloAtualizacao) {
       carregar();
       carregarVotosRevelacao();
-      carregarUltimasCedulas();
       atualizarBotaoRevelacao();
       atualizarBotaoFinal();
       atualizarBotaoPublico();
