@@ -462,27 +462,6 @@ btnExportarPDF.addEventListener("click", () => {
     el.style.breakInside = "avoid";
   });
 
-  // Força o ranking geral a ficar isolado na sua própria página, e os
-  // painéis de categoria a se distribuírem 2 por página (em vez de
-  // depender de onde sobra espaço, o que causava cortes estranhos).
-  const gridCategorias = relatorioEl.querySelector(".grid-categorias");
-  const elementosComQuebraForcada = [];
-
-  if (gridCategorias) {
-    gridCategorias.style.pageBreakBefore = "always";
-    gridCategorias.style.breakBefore = "page";
-    elementosComQuebraForcada.push(gridCategorias);
-
-    const paineis = gridCategorias.querySelectorAll(".painel");
-    paineis.forEach((painel, i) => {
-      if (i > 0 && i % 2 === 0) {
-        painel.style.pageBreakBefore = "always";
-        painel.style.breakBefore = "page";
-        elementosComQuebraForcada.push(painel);
-      }
-    });
-  }
-
   html2pdf()
     .from(relatorioEl)
     .set({
@@ -493,11 +472,7 @@ btnExportarPDF.addEventListener("click", () => {
         scale: 2,
         backgroundColor: "#141d18",
         useCORS: true,
-        windowWidth: 700,
       },
-      // Só o modo "css" (respeita page-break-inside: avoid nos itens).
-      // O modo "legacy" some elementos parcialmente e duplica bordas
-      // arredondadas cortadas entre páginas — era a causa do corte estranho.
       pagebreak: { mode: ["css"], avoid: [".item", ".painel"] },
     })
     .save()
@@ -513,10 +488,6 @@ btnExportarPDF.addEventListener("click", () => {
       relatorioEl.classList.remove("pdf-wrapper");
       relatorioEl.style.width = larguraOriginal;
       relatorioEl.style.borderRadius = raioOriginal;
-      elementosComQuebraForcada.forEach((el) => {
-        el.style.pageBreakBefore = "";
-        el.style.breakBefore = "";
-      });
       btnExportarPDF.disabled = false;
       btnExportarPDF.textContent = "📄 Exportar PDF";
     });
