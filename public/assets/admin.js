@@ -35,6 +35,7 @@ const btnToggleJuri = document.getElementById("btnToggleJuri");
 const btnToggleRevelacaoVoto = document.getElementById(
   "btnToggleRevelacaoVoto",
 );
+const btnToggleFinal = document.getElementById("btnToggleFinal");
 const cedulaRestauranteSelect = document.getElementById("cedulaRestaurante");
 const cedulaNotaInput = document.getElementById("cedulaNota");
 const cedulaQuantidadeInput = document.getElementById("cedulaQuantidade");
@@ -42,6 +43,45 @@ const cedulaNomeInput = document.getElementById("cedulaNome");
 const cedulaMsg = document.getElementById("cedulaMsg");
 const formCedula = document.getElementById("formCedula");
 const listaCedulas = document.getElementById("listaCedulas");
+async function atualizarBotaoFinal() {
+  const { data, error } = await supabase
+    .from("final_estado")
+    .select("liberado")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const liberado = data?.liberado || false;
+  btnToggleFinal.textContent = liberado
+    ? "Ocultar pódio final (voltar ao suspense)"
+    : "Liberar pódio final";
+  btnToggleFinal.dataset.liberado = liberado ? "1" : "0";
+  btnToggleFinal.classList.toggle("liberado", liberado);
+}
+
+btnToggleFinal.addEventListener("click", async () => {
+  const liberadoAtual = btnToggleFinal.dataset.liberado === "1";
+  btnToggleFinal.disabled = true;
+
+  const { error } = await supabase
+    .from("final_estado")
+    .update({ liberado: !liberadoAtual })
+    .eq("id", 1);
+
+  btnToggleFinal.disabled = false;
+
+  if (error) {
+    console.error(error);
+    adminMsg.textContent = "Erro ao mudar o estado do pódio: " + error.message;
+    return;
+  }
+
+  await atualizarBotaoFinal();
+});
 function renderHero() {
   document.getElementById("festivalBanner").innerHTML = `
     <p class="hero-antetitulo">${EVENTO.antetitulo}</p>
@@ -504,6 +544,7 @@ function verificarAdmin() {
       carregarVotosRevelacao();
       carregarUltimasCedulas();
       atualizarBotaoRevelacao();
+      atualizarBotaoFinal();
       atualizarBotaoPublico();
       atualizarBotaoJuri();
       atualizarBotaoRevelacaoVoto();
