@@ -8,6 +8,12 @@ import {
 } from "../config.js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Garante que não sobrou nenhuma sessão do Google de quando o admin
+// usava login via Supabase Auth (antes de trocarmos pra senha simples).
+// Sem isso, o Supabase trata as requisições como "authenticated" e cai
+// em policies antigas que exigem vínculo com user_id.
+supabase.auth.signOut();
 // Senha única do admin — troque aqui se precisar alterar.
 const SENHA_ADMIN = "boteco2026";
 const CHAVE_SESSAO = "admin_autenticado";
