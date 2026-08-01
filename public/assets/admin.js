@@ -483,7 +483,6 @@ function verificarAdmin() {
     if (!intervaloAtualizacao) {
       carregar();
       carregarVotosRevelacao();
-      carregarCompletudeJuri();
       carregarUltimasCedulas();
       atualizarBotaoRevelacao();
       atualizarBotaoPublico();
@@ -492,7 +491,6 @@ function verificarAdmin() {
       intervaloAtualizacao = setInterval(() => {
         carregar();
         carregarVotosRevelacao();
-        carregarCompletudeJuri();
       }, 15000);
     }
   } else {
