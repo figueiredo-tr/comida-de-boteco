@@ -147,6 +147,8 @@ function renderEtapa() {
   const proximo = ordemRevelacao[etapaAtual];
 
   const blocosRevelados = jaRevelados
+    .slice()
+    .reverse()
     .map(
       (r) => `
     <div class="revelado-card" style="margin-bottom: 14px;">
