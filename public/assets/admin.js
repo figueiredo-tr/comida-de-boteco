@@ -43,6 +43,7 @@ const cedulaNomeInput = document.getElementById("cedulaNome");
 const cedulaMsg = document.getElementById("cedulaMsg");
 const formCedula = document.getElementById("formCedula");
 const listaCedulas = document.getElementById("listaCedulas");
+const btnVerCedulas = document.getElementById("btnVerCedulas");
 let cedulasJaCarregadasUmaVez = false;
 
 btnVerCedulas.addEventListener("click", async () => {
@@ -62,7 +63,6 @@ btnVerCedulas.addEventListener("click", async () => {
     await carregarUltimasCedulas();
   }
 });
-const btnVerCedulas = document.getElementById("btnVerCedulas");
 async function atualizarBotaoFinal() {
   const { data, error } = await supabase
     .from("final_estado")
