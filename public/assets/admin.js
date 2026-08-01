@@ -31,6 +31,7 @@ const btnToggleRevelacaoVoto = document.getElementById(
 );
 const cedulaRestauranteSelect = document.getElementById("cedulaRestaurante");
 const cedulaNotaInput = document.getElementById("cedulaNota");
+const cedulaQuantidadeInput = document.getElementById("cedulaQuantidade");
 const cedulaNomeInput = document.getElementById("cedulaNome");
 const cedulaMsg = document.getElementById("cedulaMsg");
 const formCedula = document.getElementById("formCedula");
@@ -202,9 +203,15 @@ formCedula.addEventListener("submit", async (e) => {
 
   const restauranteId = cedulaRestauranteSelect.value;
   const nota = Number(cedulaNotaInput.value);
+  const quantidade = Number(cedulaQuantidadeInput.value);
 
   if (!Number.isInteger(nota) || nota < 0 || nota > 10) {
     cedulaMsg.textContent = "A nota precisa ser um número inteiro de 0 a 10.";
+    return;
+  }
+
+  if (!Number.isInteger(quantidade) || quantidade < 1) {
+    cedulaMsg.textContent = "A quantidade precisa ser 1 ou mais.";
     return;
   }
 
@@ -214,14 +221,16 @@ formCedula.addEventListener("submit", async (e) => {
 
   const nomeCedula = cedulaNomeInput.value.trim() || null;
 
-  const { error } = await supabase.from("avaliacoes_publico").insert({
+  const lote = Array.from({ length: quantidade }, () => ({
     restaurante_id: restauranteId,
     restaurante_nome: RESTAURANTES[restauranteId].nome,
     user_id: null,
     nota,
     origem: "cedula_papel",
     nome_cedula: nomeCedula,
-  });
+  }));
+
+  const { error } = await supabase.from("avaliacoes_publico").insert(lote);
 
   botao.disabled = false;
   botao.textContent = "Lançar cédula";
@@ -232,8 +241,9 @@ formCedula.addEventListener("submit", async (e) => {
     return;
   }
 
-  cedulaMsg.textContent = `Cédula lançada: ${RESTAURANTES[restauranteId].nome} — nota ${nota}${nomeCedula ? " (" + nomeCedula + ")" : ""}`;
+  cedulaMsg.textContent = `${quantidade} cédula(s) lançada(s): ${RESTAURANTES[restauranteId].nome} — nota ${nota}${nomeCedula ? " (" + nomeCedula + ")" : ""}`;
   cedulaNotaInput.value = "";
+  cedulaQuantidadeInput.value = "1";
   cedulaNomeInput.value = "";
   cedulaNotaInput.focus();
 

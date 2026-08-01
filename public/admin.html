@@ -156,9 +156,26 @@
             "
           />
           <input
+            type="number"
+            id="cedulaQuantidade"
+            min="1"
+            step="1"
+            value="1"
+            placeholder="Quantidade de cédulas com essa nota"
+            required
+            style="
+              padding: 10px 12px;
+              border-radius: 8px;
+              border: 1px solid rgba(243, 236, 216, 0.25);
+              background: rgba(243, 236, 216, 0.05);
+              color: var(--papel);
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+            "
+          />
+          <input
             type="text"
             id="cedulaNome"
-            placeholder="Nome de quem votou (opcional)"
+            placeholder="Observação (opcional)"
             style="
               padding: 10px 12px;
               border-radius: 8px;
